@@ -24,7 +24,8 @@ ai-fullstack-workflow/
 │   ├── 02-scan-and-prerequisites.md  # 项目画像 / 六项前置 / 平台选项
 │   ├── 03-spec-and-arch.md           # spec 模板 / 验收 / 架构 / ADR
 │   ├── 04-tdd.md                     # 测试示例 / 对的红 / 假测试 / 破坏实验
-│   └── 05-deploy-and-retro.md        # CloudBase / Render / 验收 / 复盘 / 洞见卡
+│   ├── 05-deploy-and-retro.md        # CloudBase / Render / 验收 / 复盘 / 洞见卡
+│   └── 06-tool-map.md                # 阶段 → 工具 → 调用话术（Matt skills）
 └── scripts/
     ├── syntax-check.js               # 一键 check 的语法检查
     ├── guard-staged.js               # 提交拦截（.env/密钥/数据/依赖）
@@ -64,6 +65,22 @@ ai-fullstack-workflow/
 - 修一处崩三处，没有回滚
 - 不知道测试该测什么，测试绿了也不放心
 
+## 配套工具（可选的“枪”）
+
+这套流程可以单独跑；装了 Matt Pocock 的 skills 会更快、更稳：
+
+- 需求/术语：`grilling` / `grill-with-docs` / `domain-modeling`
+- spec/拆分：`to-spec` / `to-tickets`
+- 实现：`tdd` / `implement` / `implement-spec` / `diagnosing-bugs`
+- 审查/复盘：`code-review` / `retro`
+- 架构：`codebase-design` / `prototype`
+- 部署：`wizard` / `research`
+- 写作：`writing-fragments` / `writing-beats` / `writing-shape`
+- 学习：`teach` / `wait-what` / `handoff`
+
+完整映射（每个阶段用哪把、怎么调用）见 [`references/06-tool-map.md`](references/06-tool-map.md)。  
+上游：https://github.com/mattpocock/skills
+
 ## 它的来源
 
 - 流程骨架参考 Matt Pocock 的 skills 结构（SKILL.md + references + 闸门 + 反模式）
@@ -75,6 +92,5 @@ ai-fullstack-workflow/
 - 它不替你写代码，只规定“怎么做、何时停、怎么验收”
 - 平台价格/政策会变，部署前以官网当日为准
 - 国内正式域名要备案；测试域名只能验证
-
 
 

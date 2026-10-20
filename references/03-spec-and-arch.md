@@ -1,5 +1,7 @@
 # 03 · 需求 / spec / 架构（Phase 4–5）
 
+> 工具：**`grilling` / `grill-with-docs`**（访谈+术语/ADR）、**`to-spec`**（把对话综合成 spec）、**`codebase-design`**（模块/接口/seam 词汇）、**`prototype`**（设计问题纸上想不清时做一次性原型）。
+
 ## 一、先写闭环句（一句话）
 
 格式：**谁 → 打开哪 → 做什么动作 → 看到什么结果 → 数据怎么变**

@@ -1,5 +1,7 @@
 # 05 · 部署与复盘（Phase 9–10）
 
+> 工具：**`wizard`**（账号/密钥/面板）、**`research`**（官方部署文档/价格）、**`retro`**（复盘环境）、**`teach`**（learning record）、**`writing-fragments` / `writing-beats` / `writing-shape`**（把经历写成洞见/文章）。
+
 ## 一、部署前：前置条件必须已满足
 
 回到 Phase 3 的六项：浏览器/登录、账号、支付、实名、域名/备案、运行时。

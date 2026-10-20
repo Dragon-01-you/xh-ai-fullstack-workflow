@@ -29,6 +29,27 @@ description: AI 时代的个人全栈开发流程。当用户要用 AI 从零做
 | 部署 | 登录/授权/付款 | 生成配置、执行命令、验证 |
 | 复盘 | 讲 10 句、写洞见卡 | 只挑事实错误 |
 
+## 工具箱（每一步对应哪把枪）
+
+> 完整映射（含调用话术、每把枪一句话、安装方式）见 `references/06-tool-map.md`。
+> 工具来自 Matt Pocock 的 skills：https://github.com/mattpocock/skills
+
+| 阶段 | 主用工具 | 产出 |
+|---|---|---|
+| 0 开工 | `grilling` / `grill-with-docs` | 设计树 + 决策 |
+| 1 环境 | `writing-for-agents`（写 AGENTS） | 规则书 |
+| 2 扫描 | 本 skill 的 scanner（`scripts/`） | 项目画像 |
+| 3 前置 | `research` + `wizard` + `to-questionnaire` | 前置条件 + 向导 |
+| 4 spec | `grill-with-docs` → `to-spec` + `domain-modeling` | GLOSSARY / ADR / spec |
+| 5 架构 | `codebase-design` + `prototype` | 深模块 / 原型 |
+| 6 TDD | `tdd` + `diagnosing-bugs` | 测试 + 红绿记录 |
+| 7 实现 | `implement` / `implement-spec` + `handoff` | 代码 + 交接 |
+| 8 验收 | `code-review` + `wait-what` | 双轴报告 |
+| 9 部署 | `wizard` + `research` | 部署向导 / 证据 |
+| 10 复盘 | `retro` + `teach` + `writing-*` | 改进 + 记录 + 文章 |
+
+**原则**：工具只加速，不改变闸门；没装工具就手工执行同一阶段。
+
 ---
 
 ## 十个阶段（每个阶段有闸门，过不了不进入下一阶段）
@@ -162,5 +183,6 @@ description: AI 时代的个人全栈开发流程。当用户要用 AI 从零做
 - `references/03-spec-and-arch.md`：spec 模板、验收示例、架构模板
 - `references/04-tdd.md`：测试示例、对的红/错的红、假测试、破坏实验
 - `references/05-deploy-and-retro.md`：CloudBase / Render 部署、验收、复盘、洞见卡
-- `scripts/`：可直接复制的 `syntax-check.js`、`guard-staged.js`
+- `references/06-tool-map.md`：阶段 → 工具 → 调用话术（Matt 的 skills 全家桶）
+- `scripts/`：可直接复制的 `syntax-check.js`、`guard-staged.js`、`pre-commit`
 

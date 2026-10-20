@@ -54,6 +54,8 @@ description: AI 时代的个人全栈开发流程。当用户要用 AI 从零做
 
 ## 十个阶段（每个阶段有闸门，过不了不进入下一阶段）
 
+> **带人做项目时**：先读 `references/07-two-layer-walkthrough.md`——每一步都有「小白版（画面/3 步/一句话）+ 专业版（术语/机制/坑）+ 对应 skill」；本文件是执行 checklist，07 是讲解版。
+
 ### Phase 0 · 开工对话（5 分钟）
 
 - [ ] 这次要“东西”还是要“能力”？
@@ -184,5 +186,6 @@ description: AI 时代的个人全栈开发流程。当用户要用 AI 从零做
 - `references/04-tdd.md`：测试示例、对的红/错的红、假测试、破坏实验
 - `references/05-deploy-and-retro.md`：CloudBase / Render 部署、验收、复盘、洞见卡
 - `references/06-tool-map.md`：阶段 → 工具 → 调用话术（Matt 的 skills 全家桶）
+- `references/07-two-layer-walkthrough.md`：双向螺旋讲解版（每步的小白版 + 专业版）
 - `scripts/`：可直接复制的 `syntax-check.js`、`guard-staged.js`、`pre-commit`
 

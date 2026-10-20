@@ -25,7 +25,8 @@ ai-fullstack-workflow/
 │   ├── 03-spec-and-arch.md           # spec 模板 / 验收 / 架构 / ADR
 │   ├── 04-tdd.md                     # 测试示例 / 对的红 / 假测试 / 破坏实验
 │   ├── 05-deploy-and-retro.md        # CloudBase / Render / 验收 / 复盘 / 洞见卡
-│   └── 06-tool-map.md                # 阶段 → 工具 → 调用话术（Matt skills）
+│   ├── 06-tool-map.md                # 阶段 → 工具 → 调用话术（Matt skills）
+│   └── 07-two-layer-walkthrough.md   # 双向螺旋：每步的小白版 + 专业版
 └── scripts/
     ├── syntax-check.js               # 一键 check 的语法检查
     ├── guard-staged.js               # 提交拦截（.env/密钥/数据/依赖）
@@ -56,6 +57,8 @@ ai-fullstack-workflow/
 ### 3. 只想学，不想被 AI 代做
 
 > 「读这个 skill。你是考生/施工队，我是出题人/判卷人。每个 Phase 我先写、先拍板，你只挑错和给选项。」
+
+**带小白/写文章时**：用 [`references/07-two-layer-walkthrough.md`](references/07-two-layer-walkthrough.md)——每一步先讲“小白版”（画面 + 3 步 + 一句话），再讲“专业版”（术语/机制/坑），最后落到对应 skill。
 
 ## 这套流程解决什么问题
 

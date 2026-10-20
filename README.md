@@ -1,4 +1,4 @@
-# 芯火 · XH | AI 全栈工作流（Skill 包)
+# 芯火 · XH | AI 全栈工作流（Skill 包）
 
 > 芯火（XH）出品。公开版已去除本地路径，可直接安装使用。
 
@@ -40,7 +40,7 @@ ai-fullstack-workflow/
 - Kimi CLI：`C:\Users\<你>\.kimi-code\skills\ai-fullstack-workflow\`
 
 **方式 B（不安装）**：直接对 AI 说：  
-> 「读 `D:\...\学习型AI协作\skills\ai-fullstack-workflow\SKILL.md`，按它的十个阶段带我做一个全栈项目。」
+> 「读 `xh-ai-fullstack-workflow/SKILL.md`，按它的十个阶段带我做一个全栈项目。」
 
 ## 怎么用（三种典型场景）
 
@@ -75,5 +75,6 @@ ai-fullstack-workflow/
 - 它不替你写代码，只规定“怎么做、何时停、怎么验收”
 - 平台价格/政策会变，部署前以官网当日为准
 - 国内正式域名要备案；测试域名只能验证
+
 
 

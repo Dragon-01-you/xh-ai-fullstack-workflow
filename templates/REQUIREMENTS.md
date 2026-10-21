@@ -1,3 +1,5 @@
+<!-- TEMPLATE v2.3.0 -->
+
 # REQUIREMENTS · <项目名>
 
 ## 谁
@@ -20,3 +22,5 @@
 
 ## 真实用户证据
 截图 / 聊天记录 / waitlist / 1 块钱付款（放 `evidence/requirements/`，至少一样）。
+
+

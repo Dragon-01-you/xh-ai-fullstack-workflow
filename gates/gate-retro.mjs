@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 复盘闸门：三问齐全、每段有实质内容、有流程 diff/补丁、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { placeholders, sectionCheck } from './content.mjs';
+import { placeholders, sectionCheck, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'RETRO.md';
@@ -30,6 +30,7 @@ const payload = {
   sections,
   has_process_diff: hasDiff,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   ok,
 };
 writeJson(out, payload);

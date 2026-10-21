@@ -51,13 +51,13 @@ test('纯静态目录 → A-static', () => {
 ### 机器闸门
 
 ```bash
-node gates/gate-tdd.mjs --command "npm test"
-# .gates/tdd.json：exit_code 必须 0
+node gates/gate-tdd.mjs
+# .gates/tdd.json：exit_code 必须 0；默认命令来自 package.json scripts.test
 
 node gates/gate-mutation.mjs \
-  --file src/scanner.js --from "A-static" --to "A-wrong" \
-  --command "npm test"
+  --file src/scanner.js --from "A-static" --to "A-wrong"
 # .gates/mutation.json：caught 必须 true（改坏后测试必须失败）
+# 默认命令来自 package.json scripts.test，且必须与 gate-tdd 相同
 ```
 
 ### 人的闸门
@@ -97,6 +97,7 @@ node gates/gate-spike.mjs --file SPIKE.md
 
 - 认证 / 支付 / 生产数据 / 密钥：**先写回滚或备份方案，人工确认后再动手**。
 - 高风险切片不追求“一次绿”；先做最小可回滚版本。
+- 机器闸门：`node gates/gate-risk.mjs --file SLICES.md` 必须通过；Phase 4/5 都会检查。
 
 ## 失败分支
 

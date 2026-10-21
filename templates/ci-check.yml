@@ -14,6 +14,8 @@ jobs:
           node-version: 24
       - run: npm ci || npm install
       - run: npm run check
-      - run: node gates/gate-tdd.mjs --command "npm test"
-      # 把下一行换成你项目里的变异参数；没有 mutation 就先注释掉
-      # - run: node gates/gate-mutation.mjs --file src/your-file.js --from "旧值" --to "变异值" --command "npm test"
+      - run: node gates/gate-tdd.mjs
+      # 必须改参数；没有 mutation 实验就注释掉这一行
+      - run: node gates/gate-mutation.mjs --file src/CHANGE_ME.js --from "旧值" --to "变异值"
+      # 关键路径：重跑 tdd/mutation/risk，再验证，防旧证据
+      - run: node gates/verify-evidence.mjs --phase 5 --rerun

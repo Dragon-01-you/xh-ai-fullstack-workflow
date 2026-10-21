@@ -67,6 +67,7 @@ function templateTest() {
     ['gate-stack.mjs', ['--file', 'STACK.md']],
     ['gate-spec.mjs', ['--file', 'SPEC.md']],
     ['gate-slices.mjs', ['--file', 'SLICES.md']],
+    ['gate-risk.mjs', ['--file', 'SLICES.md']],
     ['gate-spike.mjs', ['--file', 'SPIKE.md']],
     ['gate-retro.mjs', ['--file', 'RETRO.md']],
     ['gate-explain.mjs', ['--file', 'EVIDENCE.md']],
@@ -97,6 +98,7 @@ async function filledTest() {
       ['gate-stack.mjs', ['--file', 'STACK.md']],
       ['gate-spec.mjs', ['--file', 'SPEC.md']],
       ['gate-slices.mjs', ['--file', 'SLICES.md']],
+      ['gate-risk.mjs', ['--file', 'SLICES.md']],
       ['gate-spike.mjs', ['--file', 'SPIKE.md']],
       ['gate-retro.mjs', ['--file', 'RETRO.md']],
       ['gate-explain.mjs', ['--file', 'EVIDENCE.md']],
@@ -104,9 +106,9 @@ async function filledTest() {
     for (const [name, args] of content) record(`填好内容:${name}`, 'pass', gate(name, args, dir));
 
     const exec = [
-      ['gate-check.mjs', ['--command', 'npm test']],
-      ['gate-tdd.mjs', ['--command', 'npm test']],
-      ['gate-mutation.mjs', ['--file', 'src/math.js', '--from', 'a + b', '--to', 'a - b', '--command', 'npm test']],
+      ['gate-check.mjs', []],
+      ['gate-tdd.mjs', []],
+      ['gate-mutation.mjs', ['--file', 'src/math.js', '--from', 'a + b', '--to', 'a - b']],
       ['gate-guard.mjs', []],
       ['gate-http.mjs', ['--url', url, '--expect-status', '200', '--expect-text', 'ok']],
     ];
@@ -119,12 +121,43 @@ async function filledTest() {
       record(`verify phase ${phase}`, 'pass', gate('verify-evidence.mjs', ['--phase', String(phase)], dir));
     }
 
+    // --rerun：按当前阶段重跑关键 gate，再验证
+    record('--rerun phase 5', 'pass', gate('verify-evidence.mjs', ['--phase', '5', '--rerun'], dir));
+
+    // 命令锁定：任意命令必须被拒；显式 --allow-arbitrary-command 会写 trusted:false，verify 拒绝
+    record('命令锁定: --command "exit 0" 被拒', 'fail', gate('gate-tdd.mjs', ['--command', 'exit 0'], dir));
+    record(
+      '任意命令: --allow-arbitrary-command 放行但标 trusted:false',
+      'pass',
+      gate('gate-tdd.mjs', ['--command', 'exit 0', '--allow-arbitrary-command'], dir),
+    );
+    record('verify 拒绝 trusted:false', 'fail', gate('verify-evidence.mjs', ['--phase', '5'], dir));
+    record('恢复默认 gate-tdd', 'pass', gate('gate-tdd.mjs', [], dir));
+    record('恢复后 verify 5', 'pass', gate('verify-evidence.mjs', ['--phase', '5'], dir));
+
+    // mutation 命令必须与 gate-tdd 相同
+    record(
+      'mutation 命令不一致被拒',
+      'fail',
+      gate(
+        'gate-mutation.mjs',
+        ['--file', 'src/math.js', '--from', 'a + b', '--to', 'a - b', '--command', 'exit 1', '--allow-arbitrary-command'],
+        dir,
+      ),
+    );
+    // 变异成语法错不算 caught
+    record(
+      'mutation 语法错被拒',
+      'fail',
+      gate('gate-mutation.mjs', ['--file', 'src/math.js', '--from', 'return a + b', '--to', 'return (a + b'], dir),
+    );
+
     // 手写 JSON：不带 provenance，必须失败
     fs.writeFileSync(path.join(dir, '.gates', 'tdd.json'), JSON.stringify({ gate: 'tdd', exit_code: 0 }));
     record('手写 tdd.json 被拒', 'fail', gate('verify-evidence.mjs', ['--phase', '5'], dir));
 
     // 恢复真 tdd.json
-    record('恢复真 tdd.json', 'pass', gate('gate-tdd.mjs', ['--command', 'npm test'], dir));
+    record('恢复真 tdd.json', 'pass', gate('gate-tdd.mjs', [], dir));
 
     // 篡改真 JSON：哈希必须不匹配
     const tddPath = path.join(dir, '.gates', 'tdd.json');
@@ -132,7 +165,7 @@ async function filledTest() {
     tdd.command = 'echo fake';
     fs.writeFileSync(tddPath, JSON.stringify(tdd, null, 2));
     record('篡改 tdd.json 被拒', 'fail', gate('verify-evidence.mjs', ['--phase', '5'], dir));
-    record('再次恢复真 tdd.json', 'pass', gate('gate-tdd.mjs', ['--command', 'npm test'], dir));
+    record('再次恢复真 tdd.json', 'pass', gate('gate-tdd.mjs', [], dir));
   } finally {
     await new Promise((resolve) => server.close(resolve));
     fs.rmSync(dir, { recursive: true, force: true });

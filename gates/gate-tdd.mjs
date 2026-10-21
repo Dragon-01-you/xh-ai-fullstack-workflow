@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // TDD 闸门：跑测试命令，把 exit code 写进 .gates/tdd.json。
-import { parseArgs, writeJson, tail, now, run } from './lib.mjs';
+// 命令锁定：默认只用 package.json scripts.test / npm test；任意命令需 --allow-arbitrary-command 且 trusted:false。
+import { parseArgs, writeJson, tail, now, run, resolveCommand } from './lib.mjs';
 
 const args = parseArgs(process.argv.slice(2));
-const command = typeof args.command === 'string' ? args.command : 'npm test';
+const resolved = resolveCommand('test', args);
+const command = resolved.command;
 const out = typeof args.out === 'string' ? args.out : '.gates/tdd.json';
 const timeoutMs = Number(args['timeout-ms'] || 300000);
 
@@ -12,6 +14,8 @@ const result = run(command, { timeoutMs });
 const payload = {
   gate: 'tdd',
   command,
+  command_source: resolved.command_source,
+  trusted: resolved.trusted,
   exit_code: result.status,
   started_at: startedAt,
   duration_ms: result.duration_ms,

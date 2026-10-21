@@ -1,9 +1,10 @@
 ---
 name: xh-dev-loop
+version: 2.3.0
 description: 一个人用 AI 做全栈项目的证据驱动闭环。11 个阶段：需求 → 选型 → 环境 → 规格 → 切片 → TDD/Spike → 证据 → 验收 → 部署 → 交接 → 复盘。机器闸门 + 人的闸门，状态机，失败回滚。
 ---
 
-# XH Dev Loop（芯火开发闭环 v2.1）
+# XH Dev Loop（芯火开发闭环 v2.3.0）
 
 > **先弄懂需求，再选技术；先搭台，再写规格；先出考卷，再让 AI 答卷；最后交出去并留下能维护的人。**
 
@@ -42,8 +43,8 @@ node gates/state.mjs advance <phase> <pass|fail> <evidence-path>
 | 1 | 技术选型 | `phases/01-stack.md` | `gate-stack` | 能说出为什么不选另外两个 |
 | 2 | 搭环境 | `phases/02-environment.md` | `gate-check` + `gate-guard` | 亲眼看 `.env` 被拦 |
 | 3 | 写规格 | `phases/03-spec.md` | `gate-spec` | 把 spec 读给真实用户听 |
-| 4 | 切片 + 分型 | `phases/04-slices.md` | `gate-slices` | 每片能说出“输入 X→输出 Y”吗 |
-| 5 | TDD / Spike | `phases/05-tdd-or-spike.md` | `gate-tdd` + `gate-mutation` / `gate-spike` | 红得对、绿得真 |
+| 4 | 切片 + 分型 | `phases/04-slices.md` | `gate-slices` + `gate-risk` | 每片能说出“输入 X→输出 Y”吗 |
+| 5 | TDD / Spike | `phases/05-tdd-or-spike.md` | `gate-tdd` + `gate-mutation` + `gate-risk` | 红得对、绿得真 |
 | 6 | 证据闸门 | `phases/06-evidence.md` | `verify-evidence` + `gate-explain` | 解释关：不看代码讲数据流 |
 | 7 | 验收 | `phases/07-acceptance.md` | `gate-http` | 亲手点一遍，截图 |
 | 8 | 部署 / 回滚 | `phases/08-deploy.md` | `gate-http` + `RUNBOOK.md` | 按 runbook 回滚一次 |
@@ -75,7 +76,6 @@ node gates/state.mjs advance <phase> <pass|fail> <evidence-path>
 - 高风险（认证/支付/生产数据/密钥）→ 人工确认 + 回滚预案。
 
 ## 时间与最小路径
-
 - 完整跑完约 **20 小时**（不含备案等待）。
 - 最小可用路径：**0 → 1 → 2 → 3 → 4 → 5（第一片）→ 7 → 8**，约 8–10 小时；6/9/10 不能省，但可以最后补。
 - 第一阶段别追求全绿：先跑通一条线，再补证据。

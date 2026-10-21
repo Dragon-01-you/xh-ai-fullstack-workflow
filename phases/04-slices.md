@@ -22,8 +22,12 @@
 
 ```bash
 node gates/gate-slices.mjs --file SLICES.md
-# 检查：每行有类型（deterministic/exploratory）和验收
+# 检查：每行有类型（deterministic/exploratory）和验证动作
 # 产物：.gates/slices.json
+
+node gates/gate-risk.mjs --file SLICES.md
+# 检查：标“高/high”的切片，必须在 RISK.md 有回滚预案 + 人工确认
+# 产物：.gates/risk.json
 ```
 
 ## 人的闸门

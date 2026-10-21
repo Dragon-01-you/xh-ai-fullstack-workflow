@@ -1,5 +1,8 @@
 {
   "name": "demo",
   "private": true,
-  "scripts": { "test": "node --test" }
+  "scripts": {
+    "test": "node --test",
+    "check": "node --test"
+  }
 }

@@ -1,7 +1,7 @@
 # XH Dev Loop（芯火开发闭环）
 
-> **审计状态（2026-10-21）**：v2.2 可复现审计 **34/34 PASS**。  
-> 复现：`node audit/run-audit.mjs` ｜ 详细：[AUDIT-REPORT.md](AUDIT-REPORT.md)
+> **审计状态（2026-10-21）**：v2.3.0 可复现审计 **44/44 PASS**。  
+> 复现：`node audit/run-audit.mjs` ｜ 详细：[AUDIT-REPORT.md](AUDIT-REPORT.md) ｜ 对抗性说明：[gates/THREAT-MODEL.md](gates/THREAT-MODEL.md)
 
 > 一个人用 AI 做全栈项目的**证据驱动流程**：**11 个阶段**，每个阶段都有机器闸门或人的闸门；不靠 AI 自己打勾。
 > 顺序：需求 → 选型 → 环境 → 规格 → 切片 → TDD/Spike → 证据 → 验收 → 部署 → 交接 → 复盘。
@@ -80,11 +80,13 @@ node gates/state.mjs show
 | 解释关 | `node gates/gate-explain.mjs --file EVIDENCE.md` | `.gates/explain.json` |
 | 规格 | `node gates/gate-spec.mjs --file SPEC.md` | `.gates/spec.json` |
 | 切片 | `node gates/gate-slices.mjs --file SLICES.md` | `.gates/slices.json` |
-| TDD | `node gates/gate-tdd.mjs --command "npm test"` | `.gates/tdd.json` |
-| 破坏实验 | `node gates/gate-mutation.mjs --file src/x.js --from A --to B --command "npm test"` | `.gates/mutation.json` |
+| 高风险 | `node gates/gate-risk.mjs --file SLICES.md` | `.gates/risk.json` |
+| TDD | `node gates/gate-tdd.mjs` | `.gates/tdd.json` |
+| 破坏实验 | `node gates/gate-mutation.mjs --file src/x.js --from A --to B` | `.gates/mutation.json` |
 | 探索 | `node gates/gate-spike.mjs --file SPIKE.md` | `.gates/spike.json` |
 | 外网 | `node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200` | `.gates/http.json` |
 | 汇总 | `node gates/verify-evidence.mjs --phase <n>` | `.gates/verify-<n>.json` |
+| 重跑 | `node gates/verify-evidence.mjs --phase <n> --rerun` | 先重跑关键 gate，再汇总 |
 
 > 原则：**不看 AI 的报告，只看 exit code 和 JSON。**
 

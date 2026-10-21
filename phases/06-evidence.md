@@ -34,6 +34,9 @@ node gates/gate-explain.mjs --file EVIDENCE.md
 
 node gates/verify-evidence.mjs --phase 6
 # 检查：Phase 5 已通过 + 解释关通过
+
+node gates/verify-evidence.mjs --phase 5 --rerun
+# CI/隔周回来：先重跑 tdd/mutation/risk，再验证，防旧证据
 ```
 
 ## 人的闸门

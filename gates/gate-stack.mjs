@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 选型闸门：六段齐全、至少 2 个候选、每个候选有实质内容、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { chars, placeholders, section } from './content.mjs';
+import { chars, placeholders, section, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'STACK.md';
@@ -38,6 +38,7 @@ const payload = {
   headings: checks,
   candidates: candidateChecks,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   ok,
 };
 writeJson(out, payload);

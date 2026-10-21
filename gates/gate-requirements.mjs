@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 需求闸门：七问齐全、每段有实质内容、无占位符、证据文件不能太小。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { sectionCheck, placeholders, validEvidenceFiles } from './content.mjs';
+import { sectionCheck, placeholders, validEvidenceFiles, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'REQUIREMENTS.md';
@@ -33,6 +33,7 @@ const payload = {
   file,
   sections,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   evidence,
   ok,
 };

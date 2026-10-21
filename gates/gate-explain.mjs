@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 解释关闸门：EVIDENCE.md 必须写清数据流、最容易坏的点、怎么发现它坏了。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { placeholders, sectionCheck } from './content.mjs';
+import { placeholders, sectionCheck, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'EVIDENCE.md';
@@ -28,6 +28,7 @@ const payload = {
   file,
   sections,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   ok,
 };
 writeJson(out, payload);

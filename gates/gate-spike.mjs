@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 探索闸门：四段齐全、每段有实质内容、有删除证明、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { placeholders, sectionCheck } from './content.mjs';
+import { placeholders, sectionCheck, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'SPIKE.md';
@@ -31,6 +31,7 @@ const payload = {
   sections,
   has_deletion_proof: hasDeletion,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   ok,
 };
 writeJson(out, payload);

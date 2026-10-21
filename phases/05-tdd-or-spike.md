@@ -8,6 +8,17 @@
 
 > 测试不是“证明代码对”，是“先写检查单，再看代码有没有做到”。红 = 还没做到；绿 = 做到了。
 
+### 第一个切片：walking skeleton（不是部署）
+
+在写任何业务功能前，先做一条**最薄的本地闭环**：页面 → 接口 → 数据 → 返回。
+
+1. 先写两条测试：`/health` 返回 200；首页返回 200。
+2. 跑 → **红**（服务还不存在）。
+3. 写最小页面 + 最小接口 + 一次读写 → **绿**。
+4. 本地验证（`npm start` + curl/浏览器）；**不是部署**，部署在 Phase 8。
+
+> walking skeleton 是“证明链路能走通”，不是“上线”；它本身也要先写测试。
+
 ### 步骤（一片一次）
 
 1. 选一个纯函数/接口作为 seam（输入 → 输出，不碰 UI/网络/数据库）。
@@ -74,7 +85,7 @@ node gates/gate-mutation.mjs \
 
 ```bash
 node gates/gate-spike.mjs --file SPIKE.md
-# .gates/spike.json：检查四段齐全 + “删除证明”
+# .gates/spike.json：四段齐全 + 删除证明
 ```
 
 ### 人的闸门
@@ -90,5 +101,6 @@ node gates/gate-spike.mjs --file SPIKE.md
 
 ## 时间盒
 
-- TDD：一片 1–3 小时。
+- walking skeleton：2–4 小时。
+- 其余 TDD 切片：一片 1–3 小时。
 - Spike：严格 90 分钟。

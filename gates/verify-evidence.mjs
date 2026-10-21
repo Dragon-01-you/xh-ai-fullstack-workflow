@@ -21,18 +21,18 @@ if (!Number.isInteger(phase)) fail('没有 state.json；请用 --phase <n> 指�
 
 const checks = [];
 function add(name, ok, detail) {
-  checks.push({ name, ok: Boolean(ok), detail: detail || null });
+  checks.push({ name, ok: Boolean(ok), detail: detail ?? null });
 }
 
 if (phase === 0) {
-  const data = readJson('.gates/focus.json');
-  add('focus', data?.ok === true, data);
+  const data = readJson('.gates/requirements.json');
+  add('requirements', data?.ok === true, data);
 } else if (phase === 1) {
+  const data = readJson('.gates/stack.json');
+  add('stack', data?.ok === true, data);
+} else if (phase === 2) {
   const data = readJson('.gates/check.json');
   add('check', data?.exit_code === 0, data?.exit_code);
-} else if (phase === 2) {
-  const data = readJson('.gates/http.json');
-  add('http', data?.ok === true, data);
 } else if (phase === 3) {
   const data = readJson('.gates/spec.json');
   add('spec', data?.ok === true, data);
@@ -46,8 +46,11 @@ if (phase === 0) {
   add('tdd', tdd?.exit_code === 0, tdd?.exit_code);
   add('mutation', mutation?.caught === true, mutation?.caught);
   add('spike (optional)', spike?.ok === true, spike?.ok);
-  // 通过条件：TDD+破坏实验都过，或者 spike 过。
-  checks.push({ name: 'either', ok: (tdd?.exit_code === 0 && mutation?.caught === true) || spike?.ok === true, detail: null });
+  checks.push({
+    name: 'either',
+    ok: (tdd?.exit_code === 0 && mutation?.caught === true) || spike?.ok === true,
+    detail: null,
+  });
 } else if (phase === 7 || phase === 8) {
   const data = readJson('.gates/http.json');
   add('http', data?.ok === true, data);

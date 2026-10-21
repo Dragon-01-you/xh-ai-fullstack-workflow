@@ -1,13 +1,13 @@
-# Phase 1 · 搭环境 / 证据基础设施
+# Phase 2 · 搭环境 / 证据基础设施
 
-> 目标：让 AI 有一个“不会跑偏、改坏能回、提交前自动检查、状态可恢复”的台子。
-> **先搭台，再写业务。** 我们实际做的时候反了（先跑 v0 再补护栏），后来花了时间补。
+> 目标：按 Phase 1 选好的栈，搭一个“不会跑偏、改坏能回、提交前自动检查、状态可恢复”的台子。
+> **先搭台，再写业务。**
 
 ## 五层
 
 | 层 | 动作 |
 |---|---|
-| 工作台 | Node LTS、npm、编辑器、终端；`node -v` |
+| 工作台 | 按选型装 Node/Python/数据库/编辑器；`node -v` |
 | 存档 | `git init -b main`、`.gitignore`、首次提交、GitHub 私有仓库 |
 | 门禁 | `npm run check`、`syntax-check.js`、`guard-staged.js`、pre-commit |
 | 规则 | `AGENTS.md`、`CLAUDE.md`、`PROGRESS.md`、`.env.example`、`.nvmrc` |

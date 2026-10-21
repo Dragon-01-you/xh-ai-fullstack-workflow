@@ -8,12 +8,13 @@
 ```bash
 node gates/state.mjs init
 node gates/state.mjs show
-node gates/state.mjs advance 1 pass .gates/check.json
+node gates/state.mjs advance 1 pass .gates/stack.json
 
+node gates/gate-requirements.mjs --file REQUIREMENTS.md
+node gates/gate-stack.mjs --file STACK.md
 node gates/gate-check.mjs --command "npm run check"
 node gates/gate-spec.mjs --file SPEC.md
 node gates/gate-slices.mjs --file SLICES.md
-node gates/gate-focus.mjs --file FOCUS.md
 node gates/gate-tdd.mjs --command "npm test"
 node gates/gate-mutation.mjs --file src/x.js --from "旧值" --to "变异值" --command "npm test"
 node gates/gate-spike.mjs --file SPIKE.md

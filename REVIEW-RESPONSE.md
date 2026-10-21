@@ -4,7 +4,7 @@
 
 | # | 评审点 | v2 的改动 | 落在哪 |
 |---|---|---|---|
-| 1 | 9/10 闸门是自评 | 自评闸门换成脚本证据：`gate-requirements / gate-stack / gate-check / gate-spec / gate-slices / gate-tdd / gate-mutation / gate-http / gate-spike / gate-retro`，全部写 `.gates/*.json`，用 exit code 表态 | `gates/` |
+| 1 | 9/10 闸门是自评 | 自评闸门换成脚本证据：`gate-requirements / gate-stack / gate-check / gate-guard / gate-spec / gate-slices / gate-tdd / gate-mutation / gate-http / gate-spike / gate-explain / gate-retro`，全部写 `.gates/*.json`，用 exit code 表态 | `gates/` |
 | 2 | 只关心交付，不关心人会 | Phase 6 解释关（不看代码讲数据流）+ Phase 9 无 AI 演练；`no-ai-drill.md` | `phases/06`、`phases/09` |
 | 3 | 需求默认成立 | Phase 0 需求理解 + 问题证伪：真实用户、可观察行为、最便宜实验、放弃信号；`gate-requirements` 检查七问 + 用户证据 | `phases/00` |
 | 4 | TDD 硬套探索任务 | Phase 4 分型：能写“输入 X→输出 Y”才 TDD；不能走 90 分钟 spike，代码必须删 | `phases/04`、`phases/05` |
@@ -19,13 +19,25 @@
 | E | 验收无 CI | Phase 7 的 smoke 命令可进 CI；`gate-http` 可重跑 | `phases/07` |
 | F | 时间估算失真 | 每个 phase 的时间盒按真实范围写（不写“两小时全流程”） | `phases/` |
 
+## v2.2（B 修复）已做
+
+| 审计点 | 修法 |
+|---|---|
+| P0 ① verify-evidence 把 `spike (optional)` 算进必过项，TDD 路径被拦死 | `spike` 不再进 `checks.every`；TDD 路径只需 `tdd` + `mutation`，实测无 `spike.json` 也能过 |
+| P0 ② v2 删掉 `scripts/`，流程还在引用 | 恢复 `scripts/syntax-check.js`、`scripts/guard-staged.js`、`.githooks/pre-commit`；新增 `gate-guard` 在临时仓库实测“拦 `.env`、放行正常文件” |
+| P0 ③ 原样复制模板 = 全绿 | 内容闸门加：占位符检测、分段最小字数、每条验收必须挂 `验证：` 动作、证据文件不能太小；模板原样跑现在会红 |
+| P0 ④ `.gates/*.json` 可手写 | 所有 gate JSON 自动加 `provenance`（脚本名/命令/时间/exit_code/payload 哈希）；`verify-evidence` 校验来源、时间新鲜度、哈希 |
+| P1 Phase 6 空阶段 | Phase 6 改用 `gate-explain`：检查 `EVIDENCE.md` 的数据流/易坏点/发现方式，并前置要求 `verify-5` 已通过 |
+| P1 `--expect-text` 没暴露 | Phase 7/8 文档加上 `--expect-text`，防止白屏 200 |
+
 ## 还没完全解决的（诚实清单）
 
-- `gate-requirements` 只能检查“七问齐不齐 + 有没有证据文件”，**不能判断证据是真是假**；最终仍靠人。
-- `gate-spec` 只能检查段落和验收条数，不能判断验收写得对不对。
+- `gate-requirements` / `gate-spec` 能查“有没有填、有没有验证动作”，但**不能判断内容是否真的正确**；最终仍靠人。
 - `gate-mutation` 只能做单字符串替换；复杂变异仍需人设计。
-- 平台价格/政策仍可能过期；`last_verified` 只是提醒，不是自动复核。
-- 没有内置 CI 模板；需要用户自己把 smoke 命令接到 GitHub Actions。
+- `platforms/` 的 `last_verified` 只是提醒，不是自动复核。
+- `--rerun`（CI 里重跑 critical gates）还没内置；目前默认只校验 provenance。
+- 风险分级已经写进 Phase 4/5/7/8，但还没有独立的 `gate-risk`。
+- 三振回滚已改成“先 stash/WIP 再 reset”，但仍需人确认。
 
 ## 和 v1 最大的区别
 

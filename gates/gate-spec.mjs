@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// 规格闸门：检查 SPEC.md 的必填段落、验收条数、失败路径。
+// 规格闸门：五段齐全、至少 3 条验收、每条验收必须挂“验证：”动作、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
+import { acceptanceCheck, placeholders } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'SPEC.md';
@@ -15,16 +16,18 @@ try {
 
 const headings = ['## 问题', '## 用户故事', '## 验收', '## 不做什么', '## 失败'];
 const checks = headings.map((heading) => ({ heading, ok: text.includes(heading) }));
-const acceptance = (text.match(/^\s*-\s*\[[ x]\]/gm) || []).length;
+const acceptance = acceptanceCheck(text, { minItems: 3, minChars: 15 });
 const hasFailure = /失败/.test(text);
-const ok = checks.every((c) => c.ok) && acceptance >= 3 && hasFailure;
+const placeholderList = placeholders(text);
+const ok = checks.every((c) => c.ok) && acceptance.ok && hasFailure && placeholderList.length === 0;
 
 const payload = {
   gate: 'spec',
   file,
   headings: checks,
-  acceptance_count: acceptance,
+  acceptance,
   has_failure: hasFailure,
+  placeholders: placeholderList,
   ok,
 };
 writeJson(out, payload);

@@ -34,8 +34,11 @@
 
 ```bash
 node gates/gate-http.mjs --url https://<your-domain>/health --expect-status 200
+node gates/gate-http.mjs --url https://<your-domain>/ --expect-status 200 --expect-text "<标题关键词>"
 # .gates/http.json
 ```
+
+> 只查 200 会放过白屏；`--expect-text` 检查页面标题/关键字。
 
 ## 人的闸门
 

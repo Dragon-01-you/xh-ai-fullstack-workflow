@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// 探索闸门：SPIKE.md 四段齐全，且有“删除证明”。
+// 探索闸门：四段齐全、每段有实质内容、有删除证明、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
+import { placeholders, sectionCheck } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'SPIKE.md';
@@ -13,16 +14,23 @@ try {
   fail(`读不到 ${file}`);
 }
 
-const headings = ['## 问题', '## 我学到什么', '## 保留什么', '## 删除证明'];
-const checks = headings.map((heading) => ({ heading, ok: text.includes(heading) }));
+const specs = [
+  ['## 问题', 10],
+  ['## 我学到什么', 20],
+  ['## 保留什么', 5],
+  ['## 删除证明', 5],
+];
+const sections = specs.map(([heading, min]) => sectionCheck(text, heading, min));
 const hasDeletion = /删除|已删|删掉/.test(text);
-const ok = checks.every((c) => c.ok) && hasDeletion;
+const placeholderList = placeholders(text);
+const ok = sections.every((s) => s.ok) && hasDeletion && placeholderList.length === 0;
 
 const payload = {
   gate: 'spike',
   file,
-  headings: checks,
+  sections,
   has_deletion_proof: hasDeletion,
+  placeholders: placeholderList,
   ok,
 };
 writeJson(out, payload);

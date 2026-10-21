@@ -2,15 +2,15 @@
 
 > 目标：把“AI 说完成了”换成“机器证据 + 你能讲出来”。
 
-## 机器证据
+## 机器证据（先过 Phase 5）
 
 ```bash
 node gates/verify-evidence.mjs --phase 5
-# 检查：.gates/tdd.json exit_code=0；.gates/mutation.json caught=true
+# 检查：.gates/tdd.json exit_code=0；.gates/mutation.json caught=true；provenance 有效
 # 产物：.gates/verify-5.json
 ```
 
-规则：**不信 AI 的报告，只看 exit code / JSON 字段。**
+规则：**不信 AI 的报告，只看 exit code / JSON 字段 / provenance。**
 
 ## 解释关（人不看代码，自己讲）
 
@@ -28,7 +28,12 @@ node gates/verify-evidence.mjs --phase 5
 ## 机器闸门
 
 ```bash
-node gates/verify-evidence.mjs --phase 5
+node gates/gate-explain.mjs --file EVIDENCE.md
+# 检查：数据流/最容易坏的点/怎么发现它坏了；每段有实质内容；无占位符
+# 产物：.gates/explain.json
+
+node gates/verify-evidence.mjs --phase 6
+# 检查：Phase 5 已通过 + 解释关通过
 ```
 
 ## 人的闸门

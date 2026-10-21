@@ -28,6 +28,10 @@ node gates/state.mjs init
 ```bash
 node gates/gate-check.mjs --command "npm run check"
 # 产物：.gates/check.json（exit_code 必须是 0）
+
+node gates/gate-guard.mjs
+# 产物：.gates/guard.json
+# 检查：临时仓库里 stage .env 必须被拦；正常文件必须放行；core.hooksPath=.githooks
 ```
 
 ## 人的闸门（必须亲眼看）

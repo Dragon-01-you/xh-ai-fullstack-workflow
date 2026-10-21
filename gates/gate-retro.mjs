@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// 复盘闸门：RETRO.md 三问齐全，且必须写出流程改动（diff/补丁）。
+// 复盘闸门：三问齐全、每段有实质内容、有流程 diff/补丁、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
+import { placeholders, sectionCheck } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'RETRO.md';
@@ -13,16 +14,22 @@ try {
   fail(`读不到 ${file}`);
 }
 
-const headings = ['## 哪不好', '## 为什么', '## 流程改动'];
-const checks = headings.map((heading) => ({ heading, ok: text.includes(heading) }));
-const hasDiff = /```diff|^diff |补丁|PROCESS-PATCH/i.test(text);
-const ok = checks.every((c) => c.ok) && hasDiff;
+const specs = [
+  ['## 哪不好', 10],
+  ['## 为什么', 10],
+  ['## 流程改动', 10],
+];
+const sections = specs.map(([heading, min]) => sectionCheck(text, heading, min));
+const hasDiff = /```diff|^diff |补丁|PROCESS-PATCH/im.test(text);
+const placeholderList = placeholders(text);
+const ok = sections.every((s) => s.ok) && hasDiff && placeholderList.length === 0;
 
 const payload = {
   gate: 'retro',
   file,
-  headings: checks,
+  sections,
   has_process_diff: hasDiff,
+  placeholders: placeholderList,
   ok,
 };
 writeJson(out, payload);

@@ -1,0 +1,19 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci || npm install
+      - run: npm run check
+      - run: node gates/gate-tdd.mjs --command "npm test"
+      # 把下一行换成你项目里的变异参数；没有 mutation 就先注释掉
+      # - run: node gates/gate-mutation.mjs --file src/your-file.js --from "旧值" --to "变异值" --command "npm test"

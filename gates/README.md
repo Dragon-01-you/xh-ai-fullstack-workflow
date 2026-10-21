@@ -13,15 +13,36 @@ node gates/state.mjs advance 1 pass .gates/stack.json
 node gates/gate-requirements.mjs --file REQUIREMENTS.md
 node gates/gate-stack.mjs --file STACK.md
 node gates/gate-check.mjs --command "npm run check"
+node gates/gate-guard.mjs
 node gates/gate-spec.mjs --file SPEC.md
 node gates/gate-slices.mjs --file SLICES.md
 node gates/gate-tdd.mjs --command "npm test"
 node gates/gate-mutation.mjs --file src/x.js --from "旧值" --to "变异值" --command "npm test"
 node gates/gate-spike.mjs --file SPIKE.md
 node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200
+node gates/gate-explain.mjs --file EVIDENCE.md
 node gates/gate-retro.mjs --file RETRO.md
 node gates/verify-evidence.mjs --phase 5
 ```
+
+## provenance（防手写 JSON）
+
+每个 gate 写 JSON 时自动加：
+
+```json
+"provenance": {
+  "script": "gates/gate-tdd.mjs",
+  "command": "npm test",
+  "cwd": "...",
+  "started_at": "…",
+  "finished_at": "…",
+  "exit_code": 0,
+  "payload_sha256": "…"
+}
+```
+
+`verify-evidence` 会检查：脚本名、时间新鲜度（24h）、payload 哈希。
+手写一个只有 `exit_code:0` 的 JSON 过不了。**它挡不住“真跑脚本”，但真跑就是真证据。**
 
 ## 退出码
 

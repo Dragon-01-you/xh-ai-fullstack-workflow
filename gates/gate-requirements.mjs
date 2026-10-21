@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-// 需求闸门：REQUIREMENTS.md 七问齐全，且 evidence/requirements/ 有真实用户证据。
-import fs from 'node:fs';
-import path from 'node:path';
+// 需求闸门：七问齐全、每段有实质内容、无占位符、证据文件不能太小。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
+import { sectionCheck, placeholders, validEvidenceFiles } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'REQUIREMENTS.md';
@@ -15,22 +14,26 @@ try {
   fail(`读不到 ${file}`);
 }
 
-const headings = ['## 谁', '## 问题', '## 目标', '## 约束', '## 不做什么', '## 成功指标', '## 真实用户证据'];
-const checks = headings.map((heading) => ({ heading, ok: text.includes(heading) }));
-const evidenceDir = path.resolve('evidence/requirements');
-let evidenceCount = 0;
-if (fs.existsSync(evidenceDir)) {
-  evidenceCount = fs
-    .readdirSync(evidenceDir, { recursive: true })
-    .filter((name) => fs.statSync(path.join(evidenceDir, name)).isFile()).length;
-}
-const ok = checks.every((c) => c.ok) && evidenceCount > 0;
+const specs = [
+  ['## 谁', 15],
+  ['## 问题', 30],
+  ['## 目标', 20],
+  ['## 约束', 20],
+  ['## 不做什么', 15],
+  ['## 成功指标', 10],
+  ['## 真实用户证据', 10],
+];
+const sections = specs.map(([heading, min]) => sectionCheck(text, heading, min));
+const placeholderList = placeholders(text);
+const evidence = validEvidenceFiles('evidence/requirements', { minImageBytes: 1024, minTextChars: 50 });
+const ok = sections.every((s) => s.ok) && placeholderList.length === 0 && evidence.valid > 0;
 
 const payload = {
   gate: 'requirements',
   file,
-  headings: checks,
-  evidence_files: evidenceCount,
+  sections,
+  placeholders: placeholderList,
+  evidence,
   ok,
 };
 writeJson(out, payload);

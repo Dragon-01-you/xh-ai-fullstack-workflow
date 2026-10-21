@@ -15,6 +15,9 @@ v2 的改动，按评审的杠杆排序：
 | 病 | v2 的解法 |
 |---|---|
 | 闸门靠自评 | `gates/` 脚本产出 `.gates/*.json`（exit code / 变异是否被抓）；AI 无法伪造 exit code |
+| 内容闸门是格式闸门 | 占位符检测 + 分段字数 + 每条验收必须挂 `验证：` + 证据文件不能太小；原样模板会红 |
+| 证据 JSON 可手写 | 每个 gate 自动带 provenance（脚本名/命令/时间/exit_code/payload 哈希）；`verify-evidence` 校验 |
+| v1 护栏丢失 | 恢复 `scripts/` + `.githooks/`；`gate-guard` 在临时仓库实测“拦 .env、放行正常文件” |
 | 需求默认成立 | Phase 0 先做“需求理解 + 问题证伪”：真实用户、可观察行为、最便宜实验、放弃信号 |
 | 选型没证据 | Phase 1 技术选型：`STACK.md` 候选/维度/代价 + `gate-stack` |
 | 流程顺序错 | 需求 → 选型 → 环境 → 规格 → 切片 → TDD → 证据 → 验收 → 部署；walking skeleton 放 Phase 5，不是独立阶段 |
@@ -32,9 +35,10 @@ v2 的改动，按评审的杠杆排序：
 ```
 xh-dev-loop/
 ├── SKILL.md                 # <100 行：原则 + 阶段索引 + 状态机
-├── phases/                  # 10 个阶段，一次只读一个
-├── gates/                   # 机器闸门（exit code / JSON 证据）
-├── templates/               # REQUIREMENTS / STACK / SPEC / SLICES / EVIDENCE / RUNBOOK / RETRO
+├── phases/                  # 11 个阶段，一次只读一个
+├── gates/                   # 机器闸门（exit code / JSON / provenance）
+├── scripts/                 # 护栏：syntax-check / guard-staged / pre-commit
+├── templates/               # REQUIREMENTS / STACK / SPEC / SLICES / EVIDENCE / RUNBOOK / RETRO / CI
 ├── platforms/               # 易变平台知识，带 last_verified
 ├── manual/                  # 没有外部 skill 时的手工版
 └── examples/                # deploy-helper 案例（产物，不是流程）
@@ -68,7 +72,8 @@ node gates/state.mjs show
 |---|---|---|
 | 需求 | `node gates/gate-requirements.mjs --file REQUIREMENTS.md` | `.gates/requirements.json` |
 | 选型 | `node gates/gate-stack.mjs --file STACK.md` | `.gates/stack.json` |
-| 环境 | `node gates/gate-check.mjs` | `.gates/check.json` |
+| 环境 | `node gates/gate-check.mjs` + `node gates/gate-guard.mjs` | `.gates/check.json` + `.gates/guard.json` |
+| 解释关 | `node gates/gate-explain.mjs --file EVIDENCE.md` | `.gates/explain.json` |
 | 规格 | `node gates/gate-spec.mjs --file SPEC.md` | `.gates/spec.json` |
 | 切片 | `node gates/gate-slices.mjs --file SLICES.md` | `.gates/slices.json` |
 | TDD | `node gates/gate-tdd.mjs --command "npm test"` | `.gates/tdd.json` |
@@ -82,6 +87,12 @@ node gates/state.mjs show
 ## 案例
 
 `examples/deploy-helper.md`：我们真实做的“部署最后一公里助手”。它是本流程的产物，不是流程本身；里面记录了哪些阶段跳过了、哪些被现实卡住。
+
+## 时间与最小路径
+
+- 完整跑完约 **20 小时**（不含备案等待）。
+- 最小可用路径：**0 → 1 → 2 → 3 → 4 → 5（第一片）→ 7 → 8**，约 8–10 小时。
+- 6/9/10 不能省，但可以最后补。
 
 ## 与 v1 的关系
 

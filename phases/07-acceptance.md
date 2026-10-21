@@ -13,15 +13,18 @@
 
 ```bash
 node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200
-node gates/gate-http.mjs --url http://127.0.0.1:3000/ --expect-status 200
+node gates/gate-http.mjs --url http://127.0.0.1:3000/ --expect-status 200 --expect-text "<页面标题里的关键词>"
 # .gates/http.json
 ```
+
+> 只查 200 会放过白屏；`--expect-text` 检查页面标题/关键字，防止“空壳 200”。
 
 ## 人的闸门
 
 - 你亲手点过每一条验收吗？
 - 失败路径真的试过吗（空输入、重复提交、断网）？
 - 换一台设备/手机打开过吗？
+- **高风险项（认证/支付/生产数据）二次验收了吗？**
 
 ## 失败分支
 

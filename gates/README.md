@@ -1,0 +1,40 @@
+# gates · 机器闸门
+
+> 原则：**不信 AI 的报告，只看 exit code 和 JSON。**
+> 所有脚本只做一件事：运行命令/检查文件 → 写 `.gates/*.json` → 用退出码表态。
+
+## 命令
+
+```bash
+node gates/state.mjs init
+node gates/state.mjs show
+node gates/state.mjs advance 1 pass .gates/check.json
+
+node gates/gate-check.mjs --command "npm run check"
+node gates/gate-spec.mjs --file SPEC.md
+node gates/gate-slices.mjs --file SLICES.md
+node gates/gate-focus.mjs --file FOCUS.md
+node gates/gate-tdd.mjs --command "npm test"
+node gates/gate-mutation.mjs --file src/x.js --from "旧值" --to "变异值" --command "npm test"
+node gates/gate-spike.mjs --file SPIKE.md
+node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200
+node gates/gate-retro.mjs --file RETRO.md
+node gates/verify-evidence.mjs --phase 5
+```
+
+## 退出码
+
+- `0` = 通过；非 0 = 不通过。
+- `.gates/*.json` 里保留：`exit_code`、`caught`、`ok`、命令、输出尾部、时间。
+- `gate-mutation` 的通过条件是 `caught: true`（改坏后测试必须失败）；它自己负责恢复文件。
+
+## 为什么 AI 不能伪造
+
+- `gate-check` / `gate-tdd` 直接运行命令，exit code 由子进程返回。
+- `gate-mutation` 直接改文件、跑测试、恢复；AI 只看到 JSON。
+- 如果 AI 连脚本一起改：把 `gates/` 设为只读或单独保护；复盘时检查 `git diff gates/`。
+
+## 安全
+
+- `gate-mutation` 只允许改当前项目内的文件，且 `--from` 必须只出现一次。
+- 所有脚本不联网（除了 `gate-http` 访问你给的 URL）。

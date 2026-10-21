@@ -1,191 +1,98 @@
 ---
-name: ai-fullstack-workflow
-description: AI 时代的个人全栈开发流程。当用户要用 AI 从零做全栈项目、部署上线，或抱怨“AI 做完了我什么都没学到”时使用。十个阶段，每个阶段有闸门：搭环境 → 扫描 → 前置条件 → spec → 架构 → TDD → 实现 → 验收 → 部署 → 复盘。
+name: xh-dev-loop
+description: 一个人用 AI 做全栈项目的证据驱动闭环。十阶段、机器闸门 + 人的闸门、状态机、TDD/探索分型、失败回滚。适用于从 0 到上线，以及“AI 做完了但我没学会”的场景。
 ---
 
-# AI 全栈工作流（个人开发者版）
+# XH Dev Loop（芯火开发闭环 v2）
 
-> 一句话：**先搭环境，再出考卷，再让 AI 答卷。人是出题人 / 判卷人，AI 是考生 / 施工队。**
+> **先定问题，再搭台子，跑通一条线，按切片出证据，最后交出去并留下能维护的人。**
+> 不是“让 AI 写完”，是“让每一步都有证据”。
 
-## 什么时候用
+## 它解决什么
 
-- 要用 AI 从零做一个真实的全栈项目（不是玩具 demo）
-- 想边做边学，而不是看着 AI 做完
-- 卡在部署/上线（账号、支付、实名、备案、运行时）
-- 要把一次成功经验固化成可重复的流程
+v1 的病根：**有闸门，但闸门没牙。** 十个阶段里九个是“AI 自己打勾”。v2 把闸门换成**机器证据 + 人的证据**。
 
-## 角色
+- 自评闸门 → `gates/*.json` 的 exit code
+- 解决方案先行 → Phase 0 先做**问题证伪**
+- TDD 强加给探索任务 → Phase 4 先**分型**
+- 交付即失联 → Phase 9 的**解释关 + 无 AI 演练**
+- 复盘变日记 → Phase 10 必须产出**流程 diff**
+- 平台知识腐烂 → `platforms/` 带 `last_verified`
+- 单文件 70 个 checkbox 跳读 → 阶段拆文件 + `state.json`
 
-| 角色 | 人（你） | AI |
-|---|---|---|
-| 环境 | 定红线、跑一次 check | 搭护栏、写脚本 |
-| 扫描 | 看画像、判断对不对 | 只读扫描、输出结构化结果 |
-| 前置 | 提供账号/支付/实名；没有就决定补不补 | 说明需要什么、帮查入口/免费额度 |
-| 需求 | 写闭环句、拍板验收 | 只问事实、指出歧义 |
-| 架构 | 拍板取舍 | 给 2–3 个选项 + 代价 |
-| TDD | 判断“红得对不对” | 写测试、实现、做破坏实验 |
-| 实现 | 审接口/数据流/范围 | 小步写码、RUNLOG 报点 |
-| 验收 | 亲手点、留证据 | 给命令、报告结果 |
-| 部署 | 登录/授权/付款 | 生成配置、执行命令、验证 |
-| 复盘 | 讲 10 句、写洞见卡 | 只挑事实错误 |
+## 三条铁律
 
-## 工具箱（每一步对应哪把枪）
+1. **机器能判的交给机器**：只看 exit code / JSON，不信“我测过了”。
+2. **人必须留证据**：解释关（自己讲数据流）+ 无 AI 演练（关掉 AI 修一次）。
+3. **复盘必须改流程**：没有 diff 的复盘是日记。
 
-> 完整映射（含调用话术、每把枪一句话、安装方式）见 `references/06-tool-map.md`。
-> 工具来自 Matt Pocock 的 skills：https://github.com/mattpocock/skills
+## 状态机（每次只读一个阶段）
 
-| 阶段 | 主用工具 | 产出 |
-|---|---|---|
-| 0 开工 | `grilling` / `grill-with-docs` | 设计树 + 决策 |
-| 1 环境 | `writing-for-agents`（写 AGENTS） | 规则书 |
-| 2 扫描 | 本 skill 的 scanner（`scripts/`） | 项目画像 |
-| 3 前置 | `research` + `wizard` + `to-questionnaire` | 前置条件 + 向导 |
-| 4 spec | `grill-with-docs` → `to-spec` + `domain-modeling` | GLOSSARY / ADR / spec |
-| 5 架构 | `codebase-design` + `prototype` | 深模块 / 原型 |
-| 6 TDD | `tdd` + `diagnosing-bugs` | 测试 + 红绿记录 |
-| 7 实现 | `implement` / `implement-spec` + `handoff` | 代码 + 交接 |
-| 8 验收 | `code-review` + `wait-what` | 双轴报告 |
-| 9 部署 | `wizard` + `research` | 部署向导 / 证据 |
-| 10 复盘 | `retro` + `teach` + `writing-*` | 改进 + 记录 + 文章 |
+```bash
+node gates/state.mjs init
+node gates/state.mjs show
+node gates/state.mjs advance <phase> <pass|fail> <evidence-path>
+```
 
-**原则**：工具只加速，不改变闸门；没装工具就手工执行同一阶段。
+`state.json` 只记：`current_phase / gate / evidence / updated_at`。换会话先 `show`。
 
----
+## 阶段索引（按需读一个文件）
 
-## 十个阶段（每个阶段有闸门，过不了不进入下一阶段）
+| # | 阶段 | 文件 | 机器闸门 | 人的闸门 |
+|---|---|---|---|---|
+| 0 | 聚焦 / 问题证伪 | `phases/00-focus.md` | `FOCUS.md` 六问 + 真实用户证据 | 能说出“谁、什么行为、什么信号放弃” |
+| 1 | 搭环境 | `phases/01-environment.md` | `gate-check` 绿；`.env` 被拦 | 故意提交 `.env`，亲眼看它被拦 |
+| 2 | 走通一条线 | `phases/02-skeleton.md` | `gate-http` 200 | 手机/另一台设备打开一次 |
+| 3 | 写规格 | `phases/03-spec.md` | `gate-spec` | 把 spec 读给一个真实用户听 |
+| 4 | 切片 + 分型 | `phases/04-slices.md` | `gate-slices` | 每片能说出“输入 X → 输出 Y”吗 |
+| 5 | TDD / 探索 | `phases/05-tdd-or-spike.md` | `gate-tdd` + `gate-mutation` / `gate-spike` | 红得对、绿得真，自己讲一遍 |
+| 6 | 证据闸门 | `phases/06-evidence.md` | `verify-evidence` | 解释关：不看代码讲数据流 |
+| 7 | 验收 | `phases/07-acceptance.md` | `gate-http` + `gate-smoke` | 亲手点一遍，截图 |
+| 8 | 部署 / 回滚 | `phases/08-deploy.md` | `gate-http` + `RUNBOOK.md` | 按 runbook 回滚一次（演练） |
+| 9 | 交接 / 维护 | `phases/09-handoff.md` | `no-ai-drill.md` | 关掉 AI 修一个小 bug |
+| 10 | 复盘 / 改流程 | `phases/10-retro.md` | `RETRO.md` + 流程 diff | 这次哪条流程没拦住 |
 
-> **带人做项目时**：先读 `references/07-two-layer-walkthrough.md`——每一步都有「小白版（画面/3 步/一句话）+ 专业版（术语/机制/坑）+ 对应 skill」；本文件是执行 checklist，07 是讲解版。
+## 分型：先判断，再决定怎么测
 
-### Phase 0 · 开工对话（5 分钟）
+进 Phase 5 前，对每个切片问一句：
 
-- [ ] 这次要“东西”还是要“能力”？
-- [ ] 项目一句话：帮谁、解决什么
-- [ ] 真实用户是谁（至少 1 个人）
-- [ ] 每天能给多少时间、做几周
-- **闸门**：这四问答完才开工。
+> **我能写出“输入 X 应该输出 Y”吗？**
 
-### Phase 1 · 搭环境 / 护栏（20–30 分钟）
+- **能** → `deterministic` → TDD：先写测试看红 → 实现变绿 → 破坏实验。
+- **不能** → `exploratory` → 90 分钟 spike：只回答一个问题，**代码必须删掉**，只留 `SPIKE.md`。
 
-- [ ] `git init` + 首次提交 + 建 GitHub 私有仓库并 push
-- [ ] `.gitignore`：`node_modules/`、`data/`、`.env`、`*.log`、`coverage/`
-- [ ] `package.json` scripts：`test`、`check`（语法 + 测试）
-- [ ] 一键检查脚本（`scripts/syntax-check.js`）
-- [ ] 提交拦截（`scripts/guard-staged.js` + `.githooks/pre-commit`）
-  - 拦 `.env`、`node_modules`、`data/`、数据库文件、私钥、疑似密钥
-  - `git config core.hooksPath .githooks`
-- [ ] `AGENTS.md`（<100 行）：项目地图 / 命令 / 红线 / 学习动作
-- [ ] `CLAUDE.md`：一行指向 `AGENTS.md`（不要两份规则）
-- [ ] `PROGRESS.md`：三行（做通 / 卡在 / 明天第一条命令）
-- [ ] `.env.example`：只写键名，不写值
-- [ ] `npm run check` 全绿
-- **闸门**：`npm run check` 绿；故意提交 `.env` 会被拦住；`git status` 干净。
+> 写不出来还硬 TDD = 锁死随机猜测的假测试。
 
-### Phase 2 · 扫描（只读，1 分钟）
+## 失败分支（三振）
 
-- [ ] 扫描项目：代码形态（A 静态 / B 前后端 / B+ 同构 / C 长连接 / D GPU / E 微服务）、数据状态、AI 形态、风险
-- [ ] 扫描配置：`.env.example` 键名、`.nvmrc`、锁文件、已有部署配置
-- [ ] 输出 JSON 画像（不读源码正文、不联网、不上传）
-- **闸门**：能说出“我是什么项目、需要什么运行时、有什么风险”。
+- 同一任务失败 2 次 → **停**，回到 spec 重新切片，不许继续加提示。
+- 失败 3 次 → `git checkout .` 回到上一个绿 commit，换思路。
+- 高风险（认证/支付/生产数据/密钥）→ 必须人工确认 + 回滚预案，不许 AI 自主执行。
 
-### Phase 3 · 前置条件（先说明，再核对）
+## 不依赖外部 skill
 
-- [ ] 根据扫描结果，说明这类项目上线需要什么
-- [ ] 六项检查：浏览器/登录态、账号、支付方式、实名、域名/备案、运行时匹配
-- [ ] 核对：**有** → 用户提供；**没有** → 先帮补/扫描（实名入口、免费额度、测试域名、浏览器登录）
-- **闸门**：每项都有明确结论（有/没有/怎么补），没有的不能推荐方案。
+每个阶段文件里都有“手工版”。装了 Matt 的 skills 可以用 `references/` 里的映射加速；没装也能跑。
 
-### Phase 4 · 需求 / spec（一页纸）
+## 平台知识
 
-- [ ] 闭环句：谁 → 打开哪 → 做什么 → 看到什么 → 数据怎么变
-- [ ] 用户故事（S1…Sn）
-- [ ] 验收：3–5 条**可手工执行**、含失败路径
-- [ ] 不做什么：范围排除 + 安全红线（两类分开写）
-- [ ] 失败模式：输入错 / 依赖挂 / 重复提交
-- [ ] 前置条件写进 spec（缺什么、怎么补）
-- **闸门**：验收写不出来 = 需求没想清，不许写代码。
+`platforms/<name>.md` 只放易变事实（命令、价格、备案），顶部必须有：
 
-### Phase 5 · 架构（一页图）
+```yaml
+last_verified: 2026-10-20
+source: <官方链接>
+recheck: <复核命令/入口>
+```
 
-- [ ] 数据流：页面 → 接口 → 业务 → 存储 → 返回
-- [ ] 模块清单：每个模块的职责 + **不负责什么**
-- [ ] 接口契约：输入 / 输出 / 错误码 / 幂等
-- [ ] 数据模型：表 / 字段 / 约束 / 为什么
-- [ ] 测试 seam：在哪测、抓什么、漏什么
-- [ ] 部署拓扑 + 环境变量清单
-- [ ] ADR（`decisions/`）：选项 / 我选 / 理由 / 何时改选
-- **闸门**：能指着图讲清数据从哪来到哪去。
+超过 90 天 → AI 必须先联网复核，并明确告诉用户“这条我没复核过”。
 
-### Phase 6 · TDD（30–60 分钟）
+## 案例（只是产物，不是流程）
 
-- [ ] 先确认 seam（测试边界）
-- [ ] 写 3–5 条测试，跑 → **红**
-- [ ] 判断“对的红”（功能不存在）还是“错的红”（语法/路径/环境）
-- [ ] 实现 → **绿**
-- [ ] 破坏实验：故意改坏一行 → 测试必须红
-- [ ] 识别假测试：`assert.ok(true)`、Mock 被测对象、改测试预期来变绿
-- **闸门**：红得对、绿得真、破坏实验能抓住。
+`examples/deploy-helper.md` 是“部署最后一公里助手”这个项目的复盘：它怎么套用本流程、哪里跳过了、哪里被卡住。**流程本身在 phases/，不在案例里。**
 
-### Phase 7 · 实现（AI 写，人审三样）
+## 快速开始
 
-- [ ] AI 一次只做一个 TASK，一个测试
-- [ ] RUNLOG 先写 BEFORE（意图 / 改哪层 / 对应验收 / 预期），人确认再动
-- [ ] 人只审三样：接口签名 / 数据流 / 范围有没有扩大
-- [ ] 不许顺手重构、加未来功能
-- **闸门**：超出 spec 的改动一律退回。
-
-### Phase 8 · 验收（人亲手）
-
-- [ ] 按 spec 验收项逐条手工执行
-- [ ] 留证据：截图 / curl 输出 / 时间
-- [ ] 填 TRACE：需求 ↔ 测试 ↔ 代码路径 ↔ 手工证据 ↔ 线上行为
-- [ ] 失败先写 bug 报告（现象/复现/预期/怀疑哪层），再让 AI 诊断
-- **闸门**：缺手工证据不算完成；“测试通过”不算验收。
-
-### Phase 9 · 部署（先前置，再执行）
-
-- [ ] 确认 Phase 3 的前置条件都满足
-- [ ] 生成部署配置/步骤（`npm run plan` 或手写）
-- [ ] 人完成只有人能做的：登录、授权、实名、付款
-- [ ] AI 执行命令或陪伴操作（有头浏览器，禁止无头）
-- [ ] 外网验收：`/health` 200 + 页面标题 + 真实用户打开
-- **闸门**：外网能打开才算上线；测试域名会弹提醒，正式域名要备案。
-
-### Phase 10 · 复盘（30 分钟）
-
-- [ ] 三问：哪是狗屎 / 为什么 / 我得到什么
-- [ ] 只留一个明天要修的点
-- [ ] 写一张洞见卡：一句话 / 机理 / 可执行 / 边界
-- [ ] 更新 PROGRESS 三行 + 当日输出到 `output\YYYY-MM-DD.md`
-- **闸门**：说不出“哪里不好、为什么”，这轮算没跑完。
-
----
-
-## 反模式
-
-| 反模式 | 纠正 |
-|---|---|
-| 先推荐平台，再查前置 | 先扫描 → 说明前置 → 核对 → 再推荐 |
-| 一句话让 AI 做完整项目 | 先 environment + spec + TDD |
-| 只写 happy path 验收 | 至少 3 条含失败路径 |
-| 逐行读代码 | 只审接口/数据流/范围；行为级验收 |
-| 测试绿了就算完 | 破坏实验 + 手工验收 |
-| 改测试让测试变绿 | 直接打回 |
-| 无头浏览器 | 用用户已登录的有头浏览器 + 授权 |
-| 代付/存支付信息 | 支付步骤隐藏，人自己付 |
-| 复盘变流水账 | 三问 + 一个修点 + 一张洞见卡 |
-
-## 如果只能做一件事
-
-**先搭环境，再出考卷：`git init` + `npm run check` + `AGENTS.md` + 3 条可手工验收的 spec。** 这四样做完，AI 才有一个不会跑偏的场地。
-
-## 参考文件
-
-- `references/01-environment.md`：环境/护栏的完整命令与模板
-- `references/02-scan-and-prerequisites.md`：扫描字段、六项前置、平台选项
-- `references/03-spec-and-arch.md`：spec 模板、验收示例、架构模板
-- `references/04-tdd.md`：测试示例、对的红/错的红、假测试、破坏实验
-- `references/05-deploy-and-retro.md`：CloudBase / Render 部署、验收、复盘、洞见卡
-- `references/06-tool-map.md`：阶段 → 工具 → 调用话术（Matt 的 skills 全家桶）
-- `references/07-two-layer-walkthrough.md`：双向螺旋讲解版（每步的小白版 + 专业版）
-- `scripts/`：可直接复制的 `syntax-check.js`、`guard-staged.js`、`pre-commit`
-
+```bash
+node gates/state.mjs init
+# 读 phases/00-focus.md，填 templates/FOCUS.md
+# 按 state.json 的 current_phase 一次只读一个 phase 文件
+```

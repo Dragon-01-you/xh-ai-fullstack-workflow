@@ -1,4 +1,0 @@
-#!/bin/sh
-# 复制到项目 .githooks/pre-commit，然后 git config core.hooksPath .githooks
-node scripts/guard-staged.js || exit 1
-npm run check || exit 1

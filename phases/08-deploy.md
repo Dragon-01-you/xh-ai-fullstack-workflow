@@ -43,6 +43,7 @@ node gates/gate-http.mjs --url https://<your-domain>/ --expect-status 200 --expe
 ## 人的闸门
 
 - 外网打开一次（手机）。
+- 用 `--expect-text` 检查页面标题/关键字，确认不是白屏 200。
 - 按 runbook 回滚一次（演练）。
 - 高风险变更有人复核。
 

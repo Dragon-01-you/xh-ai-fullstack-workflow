@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 切片闸门：每行必须有 deterministic/exploratory + “验证：”动作；无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { placeholders } from './content.mjs';
+import { placeholders, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'SLICES.md';
@@ -40,6 +40,7 @@ const payload = {
   file,
   rows: checks,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   ok,
 };
 writeJson(out, payload);

@@ -3,13 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const PLACEHOLDER_PATTERNS = [
-  /<\s*[^>\n]{1,60}\s*>/g,
+  // 模板占位符风格：<项目名>、<角色>、<路径>；排除 <200> 这类数字
+  /<\s*([A-Za-z\u4e00-\u9fa5_][\w\u4e00-\u9fa5-]{0,30})\s*>/g,
   /\bTODO\b/gi,
   /\bTBD\b/gi,
-  /\bxxx\b/gi,
-  /项目名/g,
-  /<角色>/g,
-  /示例/g,
+  // 模板指纹：原样复制模板时一定会命中
+  /<!--\s*TEMPLATE[^>]*-->/g,
 ];
 
 export function placeholders(text) {
@@ -19,6 +18,11 @@ export function placeholders(text) {
     for (const match of matches) found.add(match);
   }
   return [...found];
+}
+
+export function hintFor(hits) {
+  if (!hits || hits.length === 0) return null;
+  return '检测到模板占位符 / TEMPLATE 标记 / TODO；请替换成具体内容，或删除模板标记。';
 }
 
 export function section(text, heading) {

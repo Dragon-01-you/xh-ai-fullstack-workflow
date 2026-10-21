@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 规格闸门：五段齐全、至少 3 条验收、每条验收必须挂“验证：”动作、无占位符。
 import { parseArgs, writeJson, readText, fail } from './lib.mjs';
-import { acceptanceCheck, placeholders } from './content.mjs';
+import { acceptanceCheck, placeholders, hintFor } from './content.mjs';
 
 const args = parseArgs(process.argv.slice(2));
 const file = typeof args.file === 'string' ? args.file : 'SPEC.md';
@@ -28,6 +28,7 @@ const payload = {
   acceptance,
   has_failure: hasFailure,
   placeholders: placeholderList,
+  hint: hintFor(placeholderList),
   ok,
 };
 writeJson(out, payload);

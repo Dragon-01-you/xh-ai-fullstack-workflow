@@ -21,7 +21,7 @@
 
 ## v2.2（B 修复）已做
 
-**可复现审计：`node audit/run-audit.mjs` → 34/34 PASS**（见 `AUDIT-REPORT.md`）。
+**可复现审计：`node audit/run-audit.mjs` → 41/41 PASS**（见 `AUDIT-REPORT.md`）。
 
 | 审计点 | 修法 |
 |---|---|
@@ -31,6 +31,19 @@
 | P0 ④ `.gates/*.json` 可手写 | 所有 gate JSON 自动加 `provenance`（脚本名/命令/时间/exit_code/payload 哈希）；`verify-evidence` 校验来源、时间新鲜度、哈希 |
 | P1 Phase 6 空阶段 | Phase 6 改用 `gate-explain`：检查 `EVIDENCE.md` 的数据流/易坏点/发现方式，并前置要求 `verify-5` 已通过 |
 | P1 `--expect-text` 没暴露 | Phase 7/8 文档加上 `--expect-text`，防止白屏 200 |
+
+## v2.2.1（命令锁定 + 误报修复）
+
+| 审计点 | 修法 |
+|---|---|
+| provenance 防手写，但 `--command "exit 0"` 可绕过 | `gate-check` / `gate-tdd` 默认只用 `package.json` scripts；任意命令需 `--allow-arbitrary-command`，写 `trusted:false`，verify 拒绝；mutation 命令必须与 tdd 相同 |
+| mutation 可变异成语法错 / 变异测试文件 | 变异后 `node --check`（语法坏不算 caught）；禁止 `test/tests/__tests__/fixtures` 和 `*.test.js` |
+| 占位符误伤 `示例`、`xxx`、`<200>` | 去掉通用词；`<...>` 只匹配标识符风格；模板加 `<!-- TEMPLATE v2.2.1 -->` 指纹 |
+| 24h 新鲜度过严 | 默认 7 天；`--max-age-days` / `--allow-stale` |
+| 版本号打架 | SKILL frontmatter `version: 2.2.1`；provenance 写 `version`；新增 `CHANGELOG.md` |
+| CI mutation 被注释 | `templates/ci-check.yml` 默认跑 mutation（参数需替换） |
+| Phase 8 无 `--expect-text` | Phase 8 机器闸门与文档都要求 `--expect-text` |
+| 没有对抗性文档 | 新增 `gates/THREAT-MODEL.md` |
 
 ## 还没完全解决的（诚实清单）
 

@@ -12,12 +12,12 @@ node gates/state.mjs advance 1 pass .gates/stack.json
 
 node gates/gate-requirements.mjs --file REQUIREMENTS.md
 node gates/gate-stack.mjs --file STACK.md
-node gates/gate-check.mjs --command "npm run check"
+node gates/gate-check.mjs
 node gates/gate-guard.mjs
 node gates/gate-spec.mjs --file SPEC.md
 node gates/gate-slices.mjs --file SLICES.md
-node gates/gate-tdd.mjs --command "npm test"
-node gates/gate-mutation.mjs --file src/x.js --from "旧值" --to "变异值" --command "npm test"
+node gates/gate-tdd.mjs
+node gates/gate-mutation.mjs --file src/x.js --from "旧值" --to "变异值"
 node gates/gate-spike.mjs --file SPIKE.md
 node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200
 node gates/gate-explain.mjs --file EVIDENCE.md
@@ -32,7 +32,10 @@ node gates/verify-evidence.mjs --phase 5
 ```json
 "provenance": {
   "script": "gates/gate-tdd.mjs",
+  "version": "2.2.1",
   "command": "npm test",
+  "command_source": "package.json",
+  "trusted": true,
   "cwd": "...",
   "started_at": "…",
   "finished_at": "…",
@@ -41,8 +44,15 @@ node gates/verify-evidence.mjs --phase 5
 }
 ```
 
-`verify-evidence` 会检查：脚本名、时间新鲜度（24h）、payload 哈希。
-手写一个只有 `exit_code:0` 的 JSON 过不了。**它挡不住“真跑脚本”，但真跑就是真证据。**
+`verify-evidence` 会检查：脚本名、版本、时间新鲜度（默认 7 天）、payload 哈希、`trusted:true`、tdd/mutation 命令一致。
+手写一个只有 `exit_code:0` 的 JSON 过不了；`--command "exit 0"` 也过不了（命令锁定）。
+
+## 命令锁定
+
+- `gate-check` / `gate-tdd` 默认只读 `package.json` 的 `scripts.check` / `scripts.test`。
+- 自定义命令必须加 `--allow-arbitrary-command`；它写 `trusted:false`，`verify-evidence` 拒绝。
+- `gate-mutation` 的测试命令必须与 `gate-tdd` 完全相同。
+- 绕过与拦截边界见 [`THREAT-MODEL.md`](THREAT-MODEL.md)。
 
 ## 退出码
 

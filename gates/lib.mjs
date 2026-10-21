@@ -4,6 +4,40 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 
+export const SKILL_VERSION = '2.2.1';
+
+export function readPackageScript(name) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf8'));
+    return typeof pkg.scripts?.[name] === 'string' ? pkg.scripts[name] : null;
+  } catch {
+    return null;
+  }
+}
+
+// 命令锁定：默认只接受 package.json 的 scripts.test / scripts.check（或标准兜底）。
+// 自定义命令必须显式 --allow-arbitrary-command，并标记 trusted:false；verify 会拒绝。
+export function resolveCommand(kind, args) {
+  const scriptName = kind === 'check' ? 'check' : 'test';
+  const pkgCommand = readPackageScript(scriptName);
+  const fallback = kind === 'check' ? 'npm run check' : 'npm test';
+  const expected = pkgCommand || fallback;
+  const provided = typeof args.command === 'string' ? args.command : null;
+  if (!provided) {
+    return { command: expected, trusted: true, command_source: pkgCommand ? 'package.json' : 'default' };
+  }
+  if (provided === expected) {
+    return { command: expected, trusted: true, command_source: pkgCommand ? 'package.json' : 'default' };
+  }
+  if (args['allow-arbitrary-command']) {
+    return { command: provided, trusted: false, command_source: 'arbitrary' };
+  }
+  fail(
+    `命令被锁定：${kind} 默认应为 "${expected}"（来自 package.json 或标准兜底）。\n` +
+      `如确需自定义，加 --allow-arbitrary-command；它会被标记 trusted:false，verify-evidence 会拒绝。`,
+  );
+}
+
 export function parseArgs(argv) {
   const out = { _: [] };
   for (let i = 0; i < argv.length; i += 1) {
@@ -40,7 +74,10 @@ export function writeJson(file, value) {
     const hash = sha256(JSON.stringify(core));
     value.provenance = {
       script: value.gate === 'verify-evidence' ? 'gates/verify-evidence.mjs' : `gates/gate-${value.gate}.mjs`,
+      version: SKILL_VERSION,
       command: value.command || value.url || value.file || '',
+      command_source: value.command_source || '',
+      trusted: value.trusted ?? null,
       cwd: process.cwd(),
       started_at: value.started_at || now(),
       finished_at: now(),

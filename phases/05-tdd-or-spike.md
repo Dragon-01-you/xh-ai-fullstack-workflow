@@ -97,6 +97,7 @@ node gates/gate-spike.mjs --file SPIKE.md
 
 - 认证 / 支付 / 生产数据 / 密钥：**先写回滚或备份方案，人工确认后再动手**。
 - 高风险切片不追求“一次绿”；先做最小可回滚版本。
+- 机器闸门：`node gates/gate-risk.mjs --file SLICES.md` 必须通过；Phase 4/5 都会检查。
 
 ## 失败分支
 

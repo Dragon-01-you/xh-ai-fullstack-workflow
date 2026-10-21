@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v2.3.0（2026-10-21）· --rerun + gate-risk
+
+- **`--rerun`**：`verify-evidence --phase N --rerun` 先按阶段重跑关键 gate，再验证。
+  - Phase 5 重跑 `gate-tdd` / `gate-mutation` / `gate-risk`；Phase 6 会先重跑 Phase 5，再跑解释关。
+  - Phase 7/8 用旧 `.gates/http.json` 里的 URL 重跑；Phase 4 重跑 slices + risk。
+- **`gate-risk`**：`SLICES.md` 标“高/high”的切片，必须在 `RISK.md` 有回滚预案 + 人工确认；Phase 4/5 都要求。
+- 审计：`node audit/run-audit.mjs` → **44/44 PASS**。
+- 模板指纹更新为 `<!-- TEMPLATE v2.3.0 -->`；新增 `templates/RISK.md`。
+
 ## v2.2.1（2026-10-21）· 审计 2 修复
 
 ### P0

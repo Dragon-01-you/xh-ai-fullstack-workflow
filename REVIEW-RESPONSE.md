@@ -45,6 +45,14 @@
 | Phase 8 无 `--expect-text` | Phase 8 机器闸门与文档都要求 `--expect-text` |
 | 没有对抗性文档 | 新增 `gates/THREAT-MODEL.md` |
 
+## v2.3.0（--rerun + gate-risk）
+
+| 审计建议 | 落地 |
+|---|---|
+| `--rerun` 不只是 CI 重跑，要定义旧证据何时作废 | `verify-evidence --phase N --rerun`：先按阶段重跑关键 gate（Phase 5 重跑 tdd/mutation/risk），再验证；CI 模板已接入 |
+| 高风险切片“标了等于没标” | `gate-risk`：高风险切片必须在 `RISK.md` 有回滚预案 + 人工确认；Phase 4/5 都检查 |
+| 审计报告 | 44/44 PASS（新增 gate-risk / --rerun 用例） |
+
 ## 还没完全解决的（诚实清单）
 
 - `gate-requirements` / `gate-spec` 能查“有没有填、有没有验证动作”，但**不能判断内容是否真的正确**；最终仍靠人。

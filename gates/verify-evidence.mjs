@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 // 汇总闸门：按阶段检查证据；校验 provenance（脚本名/版本/时间/哈希/trusted）。
-// 防绕过：命令锁定（trusted 必须 true）、mutation 命令必须与 tdd 相同、mutation 不能是语法错。
+// --rerun：先按当前阶段重跑关键 gate（覆盖旧 JSON），再验证；CI 用它防旧证据。
 import fs from 'node:fs';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { parseArgs, writeJson, fail, sha256 } from './lib.mjs';
+
+const gatesDir = path.dirname(fileURLToPath(import.meta.url));
 
 function readJson(file) {
   try {
@@ -15,6 +20,50 @@ function readJson(file) {
 const args = parseArgs(process.argv.slice(2));
 const maxAgeDays = Number(args['max-age-days'] || 7);
 const allowStale = Boolean(args['allow-stale']);
+const rerun = Boolean(args.rerun);
+const rerunCommands = [];
+
+function runGateFile(name, gateArgs) {
+  const result = spawnSync(process.execPath, [path.join(gatesDir, name), ...gateArgs], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+  rerunCommands.push({ name, args: gateArgs, exit: result.status ?? 1 });
+  return result.status ?? 1;
+}
+
+function rerunPhase(phase) {
+  if (phase === 0) runGateFile('gate-requirements.mjs', ['--file', 'REQUIREMENTS.md']);
+  else if (phase === 1) runGateFile('gate-stack.mjs', ['--file', 'STACK.md']);
+  else if (phase === 2) runGateFile('gate-check.mjs', []);
+  else if (phase === 3) runGateFile('gate-spec.mjs', ['--file', 'SPEC.md']);
+  else if (phase === 4) {
+    runGateFile('gate-slices.mjs', ['--file', 'SLICES.md']);
+    runGateFile('gate-risk.mjs', ['--file', 'SLICES.md']);
+  } else if (phase === 5) {
+    runGateFile('gate-tdd.mjs', []);
+    const mutation = readJson('.gates/mutation.json');
+    if (mutation?.file && mutation?.from && mutation?.to) {
+      runGateFile('gate-mutation.mjs', ['--file', mutation.file, '--from', mutation.from, '--to', mutation.to]);
+    }
+    runGateFile('gate-risk.mjs', ['--file', 'SLICES.md']);
+  } else if (phase === 6) {
+    rerunPhase(5);
+    runGateFile('verify-evidence.mjs', ['--phase', '5']);
+    runGateFile('gate-explain.mjs', ['--file', 'EVIDENCE.md']);
+  } else if (phase === 7 || phase === 8) {
+    const http = readJson('.gates/http.json');
+    if (http?.url) {
+      const httpArgs = ['--url', http.url, '--expect-status', String(http.expected_status || 200)];
+      if (http.expect_text) httpArgs.push('--expect-text', http.expect_text);
+      runGateFile('gate-http.mjs', httpArgs);
+    }
+  } else if (phase === 9) {
+    runGateFile('gate-check.mjs', []);
+  } else if (phase === 10) {
+    runGateFile('gate-retro.mjs', ['--file', 'RETRO.md']);
+  }
+}
 
 function checkProvenance(data, expectedScript) {
   if (!data || typeof data !== 'object') return { ok: false, reasons: ['缺少 JSON'] };
@@ -47,6 +96,8 @@ if (!Number.isInteger(phase)) {
 }
 if (!Number.isInteger(phase)) fail('没有 state.json；请用 --phase <n> 指定阶段。');
 
+if (rerun) rerunPhase(phase);
+
 const checks = [];
 function add(name, ok, detail) {
   checks.push({ name, ok: Boolean(ok), detail: detail ?? null });
@@ -68,6 +119,7 @@ if (phase === 0) {
   addGate('spec', '.gates/spec.json', 'gates/gate-spec.mjs', (d) => d.ok === true);
 } else if (phase === 4) {
   addGate('slices', '.gates/slices.json', 'gates/gate-slices.mjs', (d) => d.ok === true);
+  addGate('risk', '.gates/risk.json', 'gates/gate-risk.mjs', (d) => d.ok === true);
 } else if (phase === 5) {
   const tdd = addGate('tdd', '.gates/tdd.json', 'gates/gate-tdd.mjs', (d) => d.exit_code === 0 && d.trusted === true);
   const mutation = addGate(
@@ -80,6 +132,7 @@ if (phase === 0) {
     tdd: tdd?.command || null,
     mutation: mutation?.command || null,
   });
+  addGate('risk', '.gates/risk.json', 'gates/gate-risk.mjs', (d) => d.ok === true);
   checks.push({ name: 'spike (optional)', ok: true, detail: readJson('.gates/spike.json')?.ok === true });
 } else if (phase === 6) {
   add('phase 5 已通过', readJson('.gates/verify-5.json')?.ok === true, '.gates/verify-5.json');
@@ -102,6 +155,8 @@ const ok = checks.every((c) => c.ok);
 const payload = {
   gate: 'verify-evidence',
   phase,
+  rerun,
+  rerun_commands: rerunCommands,
   max_age_days: maxAgeDays,
   stale_allowed: allowStale,
   checks,

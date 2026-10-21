@@ -17,3 +17,5 @@ jobs:
       - run: node gates/gate-tdd.mjs
       # 必须改参数；没有 mutation 实验就注释掉这一行
       - run: node gates/gate-mutation.mjs --file src/CHANGE_ME.js --from "旧值" --to "变异值"
+      # 关键路径：重跑 tdd/mutation/risk，再验证，防旧证据
+      - run: node gates/verify-evidence.mjs --phase 5 --rerun

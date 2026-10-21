@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 
-export const SKILL_VERSION = '2.2.1';
+export const SKILL_VERSION = '2.3.0';
 
 export function readPackageScript(name) {
   try {

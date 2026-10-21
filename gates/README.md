@@ -16,6 +16,7 @@ node gates/gate-check.mjs
 node gates/gate-guard.mjs
 node gates/gate-spec.mjs --file SPEC.md
 node gates/gate-slices.mjs --file SLICES.md
+node gates/gate-risk.mjs --file SLICES.md
 node gates/gate-tdd.mjs
 node gates/gate-mutation.mjs --file src/x.js --from "旧值" --to "变异值"
 node gates/gate-spike.mjs --file SPIKE.md
@@ -23,7 +24,10 @@ node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200
 node gates/gate-explain.mjs --file EVIDENCE.md
 node gates/gate-retro.mjs --file RETRO.md
 node gates/verify-evidence.mjs --phase 5
+node gates/verify-evidence.mjs --phase 5 --rerun
 ```
+
+`--rerun`：先按阶段重跑关键 gate（Phase 5 会重跑 tdd/mutation/risk），再验证；CI 用它防旧证据。
 
 ## provenance（防手写 JSON）
 

@@ -67,6 +67,7 @@ function templateTest() {
     ['gate-stack.mjs', ['--file', 'STACK.md']],
     ['gate-spec.mjs', ['--file', 'SPEC.md']],
     ['gate-slices.mjs', ['--file', 'SLICES.md']],
+    ['gate-risk.mjs', ['--file', 'SLICES.md']],
     ['gate-spike.mjs', ['--file', 'SPIKE.md']],
     ['gate-retro.mjs', ['--file', 'RETRO.md']],
     ['gate-explain.mjs', ['--file', 'EVIDENCE.md']],
@@ -97,6 +98,7 @@ async function filledTest() {
       ['gate-stack.mjs', ['--file', 'STACK.md']],
       ['gate-spec.mjs', ['--file', 'SPEC.md']],
       ['gate-slices.mjs', ['--file', 'SLICES.md']],
+      ['gate-risk.mjs', ['--file', 'SLICES.md']],
       ['gate-spike.mjs', ['--file', 'SPIKE.md']],
       ['gate-retro.mjs', ['--file', 'RETRO.md']],
       ['gate-explain.mjs', ['--file', 'EVIDENCE.md']],
@@ -118,6 +120,9 @@ async function filledTest() {
     for (let phase = 0; phase <= 10; phase += 1) {
       record(`verify phase ${phase}`, 'pass', gate('verify-evidence.mjs', ['--phase', String(phase)], dir));
     }
+
+    // --rerun：按当前阶段重跑关键 gate，再验证
+    record('--rerun phase 5', 'pass', gate('verify-evidence.mjs', ['--phase', '5', '--rerun'], dir));
 
     // 命令锁定：任意命令必须被拒；显式 --allow-arbitrary-command 会写 trusted:false，verify 拒绝
     record('命令锁定: --command "exit 0" 被拒', 'fail', gate('gate-tdd.mjs', ['--command', 'exit 0'], dir));

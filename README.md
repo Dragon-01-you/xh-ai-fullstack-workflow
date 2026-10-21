@@ -41,6 +41,7 @@ xh-dev-loop/
 ├── templates/               # REQUIREMENTS / STACK / SPEC / SLICES / EVIDENCE / RUNBOOK / RETRO / CI
 ├── platforms/               # 易变平台知识，带 last_verified
 ├── manual/                  # 没有外部 skill 时的手工版
+├── audit/                   # 可复现审计：node audit/run-audit.mjs
 └── examples/                # deploy-helper 案例（产物，不是流程）
 ```
 

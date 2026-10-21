@@ -21,6 +21,8 @@
 
 ## v2.2（B 修复）已做
 
+**可复现审计：`node audit/run-audit.mjs` → 34/34 PASS**（见 `AUDIT-REPORT.md`）。
+
 | 审计点 | 修法 |
 |---|---|
 | P0 ① verify-evidence 把 `spike (optional)` 算进必过项，TDD 路径被拦死 | `spike` 不再进 `checks.every`；TDD 路径只需 `tdd` + `mutation`，实测无 `spike.json` 也能过 |

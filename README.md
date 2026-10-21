@@ -1,5 +1,8 @@
 # XH Dev Loop（芯火开发闭环）
 
+> **审计状态（2026-10-21）**：v2.2 可复现审计 **34/34 PASS**。  
+> 复现：`node audit/run-audit.mjs` ｜ 详细：[AUDIT-REPORT.md](AUDIT-REPORT.md)
+
 > 一个人用 AI 做全栈项目的**证据驱动流程**：**11 个阶段**，每个阶段都有机器闸门或人的闸门；不靠 AI 自己打勾。
 > 顺序：需求 → 选型 → 环境 → 规格 → 切片 → TDD/Spike → 证据 → 验收 → 部署 → 交接 → 复盘。
 > walking skeleton 不是独立阶段：它是 Phase 5 的第一个 TDD 切片（本地闭环，先写测试），不是部署。
@@ -98,4 +101,5 @@ node gates/state.mjs show
 ## 与 v1 的关系
 
 - v1：仓库 `xh-ai-fullstack-workflow` 的 `v1.1` 分支（保留作对照；它把部署项目当成了流程核心）
-- v2：本仓库的 `v2` 分支（流程优先；部署项目只做案例）
+- v2：本仓库的 `v2` 分支（已开 PR 合并到 `main`；部署项目只做案例）
+- 下一轮：见 [BACKLOG.md](BACKLOG.md)（`--rerun`、`gate-risk`）

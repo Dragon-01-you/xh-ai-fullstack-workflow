@@ -1,99 +1,105 @@
-# 芯火 · XH | AI 全栈工作流（Skill 包）
+# XH Dev Loop（芯火开发闭环）
 
-> 芯火（XH）出品。公开版已去除本地路径，可直接安装使用。
+> **审计状态（2026-10-21）**：v2.2 可复现审计 **34/34 PASS**。  
+> 复现：`node audit/run-audit.mjs` ｜ 详细：[AUDIT-REPORT.md](AUDIT-REPORT.md)
 
-> 把「用 AI 从零做一个真实全栈项目」的全过程，固化成一套**可被任何 AI 读取、可重复执行**的 skill。
-> 十个阶段：搭环境 → 扫描 → 前置条件 → spec → 架构 → TDD → 实现 → 验收 → 部署 → 复盘。
+> 一个人用 AI 做全栈项目的**证据驱动流程**：**11 个阶段**，每个阶段都有机器闸门或人的闸门；不靠 AI 自己打勾。
+> 顺序：需求 → 选型 → 环境 → 规格 → 切片 → TDD/Spike → 证据 → 验收 → 部署 → 交接 → 复盘。
+> walking skeleton 不是独立阶段：它是 Phase 5 的第一个 TDD 切片（本地闭环，先写测试），不是部署。
 
-## 这是什么
+## 为什么有 v2
 
-不是代码库，是一套**流程说明书 + 模板 + 闸门**。任何能读文件的 AI（Claude Code / Codex / Cursor / DSH / Kimi CLI…）读完 `SKILL.md` 就能按它带你做项目。
+v1（`xh-ai-fullstack-workflow`）被评审指出一个病根：
 
-核心一句话：
+> **有闸门，但闸门没牙。** v1 的十个阶段里九个是“AI 自己打勾”，等于让考生自己判卷。
 
-> **先搭环境，再出考卷，再让 AI 答卷。人是出题人/判卷人，AI 是考生/施工队。**
+v2 的改动，按评审的杠杆排序：
 
-## 目录
+| 病 | v2 的解法 |
+|---|---|
+| 闸门靠自评 | `gates/` 脚本产出 `.gates/*.json`（exit code / 变异是否被抓）；AI 无法伪造 exit code |
+| 内容闸门是格式闸门 | 占位符检测 + 分段字数 + 每条验收必须挂 `验证：` + 证据文件不能太小；原样模板会红 |
+| 证据 JSON 可手写 | 每个 gate 自动带 provenance（脚本名/命令/时间/exit_code/payload 哈希）；`verify-evidence` 校验 |
+| v1 护栏丢失 | 恢复 `scripts/` + `.githooks/`；`gate-guard` 在临时仓库实测“拦 .env、放行正常文件” |
+| 需求默认成立 | Phase 0 先做“需求理解 + 问题证伪”：真实用户、可观察行为、最便宜实验、放弃信号 |
+| 选型没证据 | Phase 1 技术选型：`STACK.md` 候选/维度/代价 + `gate-stack` |
+| 流程顺序错 | 需求 → 选型 → 环境 → 规格 → 切片 → TDD → 证据 → 验收 → 部署；walking skeleton 放 Phase 5，不是独立阶段 |
+| TDD 硬套探索任务 | Phase 4 先分型：能写出“输入 X→输出 Y”才 TDD；不能就走 90 分钟 spike，代码必须删 |
+| 交付即失联 | Phase 6 解释关 + Phase 9 无 AI 演练：关掉 AI 修一次 |
+| 复盘产散文 | Phase 10 必须产出**流程 diff**（改 SKILL/phases/gates），否则不算完 |
+| 平台知识腐烂 | 平台事实外置到 `platforms/`，带 `last_verified`；超 90 天必须先复核 |
+| 单文件 70 个勾会跳读 | SKILL.md 瘦身；阶段拆文件；`state.json` 只记一行状态 |
+| 没有逃生舱 | 三振规则：2 次失败停、3 次回滚；高风险必须人工确认 |
+| 外部依赖太重 | 每个 phase 都有“手工版”；Matt skills 只是加速器 |
+| 没有 CI/回归 | Phase 7 的 smoke 命令可进 CI；验收证据可重跑 |
+
+## 结构
 
 ```
-ai-fullstack-workflow/
-├── SKILL.md                          # 入口：十个阶段 + 闸门 + 反模式
-├── README.md                         # 本文件
-├── references/
-│   ├── 01-environment.md             # git / check / 拦截 / AGENTS / PROGRESS
-│   ├── 02-scan-and-prerequisites.md  # 项目画像 / 六项前置 / 平台选项
-│   ├── 03-spec-and-arch.md           # spec 模板 / 验收 / 架构 / ADR
-│   ├── 04-tdd.md                     # 测试示例 / 对的红 / 假测试 / 破坏实验
-│   ├── 05-deploy-and-retro.md        # CloudBase / Render / 验收 / 复盘 / 洞见卡
-│   ├── 06-tool-map.md                # 阶段 → 工具 → 调用话术（Matt skills）
-│   └── 07-two-layer-walkthrough.md   # 双向螺旋：每步的小白版 + 专业版
-└── scripts/
-    ├── syntax-check.js               # 一键 check 的语法检查
-    ├── guard-staged.js               # 提交拦截（.env/密钥/数据/依赖）
-    └── pre-commit                    # 复制到 .githooks/pre-commit
+xh-dev-loop/
+├── SKILL.md                 # <100 行：原则 + 阶段索引 + 状态机
+├── phases/                  # 11 个阶段，一次只读一个
+├── gates/                   # 机器闸门（exit code / JSON / provenance）
+├── scripts/                 # 护栏：syntax-check / guard-staged / pre-commit
+├── templates/               # REQUIREMENTS / STACK / SPEC / SLICES / EVIDENCE / RUNBOOK / RETRO / CI
+├── platforms/               # 易变平台知识，带 last_verified
+├── manual/                  # 没有外部 skill 时的手工版
+├── audit/                   # 可复现审计：node audit/run-audit.mjs
+└── examples/                # deploy-helper 案例（产物，不是流程）
 ```
 
-## 怎么安装
+## 安装
 
-**方式 A（推荐）**：把整个 `ai-fullstack-workflow/` 复制到你的 AI 工具 skills 目录：
+把整个目录复制到你的 AI skills 目录：
 
-- Claude Code / DSH：`C:\Users\<你>\.agents\skills\ai-fullstack-workflow\`
-- Claude Code 专用：`C:\Users\<你>\.claude\skills\ai-fullstack-workflow\`
-- Kimi CLI：`C:\Users\<你>\.kimi-code\skills\ai-fullstack-workflow\`
+```bash
+# Claude Code / DSH
+~/.agents/skills/xh-dev-loop/
+# 或 Claude Code 专用
+~/.claude/skills/xh-dev-loop/
+```
 
-**方式 B（不安装）**：直接对 AI 说：  
-> 「读 `xh-ai-fullstack-workflow/SKILL.md`，按它的十个阶段带我做一个全栈项目。」
+或者不安装，直接让 AI 读 `SKILL.md` 的绝对路径。
 
-## 怎么用（三种典型场景）
+## 快速开始
 
-### 1. 从零做一个项目
+```bash
+node gates/state.mjs init
+node gates/state.mjs show
+# 按 current_phase 读 phases/00-requirements.md，填 templates/REQUIREMENTS.md
+# 做完一个阶段，跑对应 gate，再 advance
+```
 
-> 「读这个 skill。从 Phase 0 开始，每个阶段结束让我确认再继续。先把 Phase 1 的环境搭好，再写第一行业务代码。」
+## 闸门怎么用
 
-### 2. 已经卡住了（部署/前置条件）
+| 闸门 | 命令 | 产物 |
+|---|---|---|
+| 需求 | `node gates/gate-requirements.mjs --file REQUIREMENTS.md` | `.gates/requirements.json` |
+| 选型 | `node gates/gate-stack.mjs --file STACK.md` | `.gates/stack.json` |
+| 环境 | `node gates/gate-check.mjs` + `node gates/gate-guard.mjs` | `.gates/check.json` + `.gates/guard.json` |
+| 解释关 | `node gates/gate-explain.mjs --file EVIDENCE.md` | `.gates/explain.json` |
+| 规格 | `node gates/gate-spec.mjs --file SPEC.md` | `.gates/spec.json` |
+| 切片 | `node gates/gate-slices.mjs --file SLICES.md` | `.gates/slices.json` |
+| TDD | `node gates/gate-tdd.mjs --command "npm test"` | `.gates/tdd.json` |
+| 破坏实验 | `node gates/gate-mutation.mjs --file src/x.js --from A --to B --command "npm test"` | `.gates/mutation.json` |
+| 探索 | `node gates/gate-spike.mjs --file SPIKE.md` | `.gates/spike.json` |
+| 外网 | `node gates/gate-http.mjs --url http://127.0.0.1:3000/health --expect-status 200` | `.gates/http.json` |
+| 汇总 | `node gates/verify-evidence.mjs --phase <n>` | `.gates/verify-<n>.json` |
 
-> 「读这个 skill 的 Phase 3 和 Phase 9。先扫描我的项目，说明前置条件，再告诉我缺什么、怎么补，不要先推荐平台。」
+> 原则：**不看 AI 的报告，只看 exit code 和 JSON。**
 
-### 3. 只想学，不想被 AI 代做
+## 案例
 
-> 「读这个 skill。你是考生/施工队，我是出题人/判卷人。每个 Phase 我先写、先拍板，你只挑错和给选项。」
+`examples/deploy-helper.md`：我们真实做的“部署最后一公里助手”。它是本流程的产物，不是流程本身；里面记录了哪些阶段跳过了、哪些被现实卡住。
 
-**带小白/写文章时**：用 [`references/07-two-layer-walkthrough.md`](references/07-two-layer-walkthrough.md)——每一步先讲“小白版”（画面 + 3 步 + 一句话），再讲“专业版”（术语/机制/坑），最后落到对应 skill。
+## 时间与最小路径
 
-## 这套流程解决什么问题
+- 完整跑完约 **20 小时**（不含备案等待）。
+- 最小可用路径：**0 → 1 → 2 → 3 → 4 → 5（第一片）→ 7 → 8**，约 8–10 小时。
+- 6/9/10 不能省，但可以最后补。
 
-- AI 一句话生成，你什么都没学到
-- AI 做完了，但代码不敢改、不敢上线
-- 部署卡在账号/支付/实名/备案
-- 修一处崩三处，没有回滚
-- 不知道测试该测什么，测试绿了也不放心
+## 与 v1 的关系
 
-## 配套工具（可选的“枪”）
-
-这套流程可以单独跑；装了 Matt Pocock 的 skills 会更快、更稳：
-
-- 需求/术语：`grilling` / `grill-with-docs` / `domain-modeling`
-- spec/拆分：`to-spec` / `to-tickets`
-- 实现：`tdd` / `implement` / `implement-spec` / `diagnosing-bugs`
-- 审查/复盘：`code-review` / `retro`
-- 架构：`codebase-design` / `prototype`
-- 部署：`wizard` / `research`
-- 写作：`writing-fragments` / `writing-beats` / `writing-shape`
-- 学习：`teach` / `wait-what` / `handoff`
-
-完整映射（每个阶段用哪把、怎么调用）见 [`references/06-tool-map.md`](references/06-tool-map.md)。  
-上游：https://github.com/mattpocock/skills
-
-## 它的来源
-
-- 流程骨架参考 Matt Pocock 的 skills 结构（SKILL.md + references + 闸门 + 反模式）
-- “出题人/考生”的写作洞见来自姜胡说的影响力写作框架
-- 所有阶段来自一次真实实践：搭环境、TDD 红绿、破坏实验、扫描器、CloudBase 部署、Render 前置条件翻车
-
-## 边界
-
-- 它不替你写代码，只规定“怎么做、何时停、怎么验收”
-- 平台价格/政策会变，部署前以官网当日为准
-- 国内正式域名要备案；测试域名只能验证
-
-
+- v1：仓库 `xh-ai-fullstack-workflow` 的 `v1.1` 分支（保留作对照；它把部署项目当成了流程核心）
+- v2：本仓库的 `v2` 分支（已开 PR 合并到 `main`；部署项目只做案例）
+- 下一轮：见 [BACKLOG.md](BACKLOG.md)（`--rerun`、`gate-risk`）
